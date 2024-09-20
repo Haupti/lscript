@@ -1,0 +1,13 @@
+name: cl
+version: 0.1.0
+
+authors:
+  - redstar <marwin.ack@googlemail.com>
+
+targets:
+  cl:
+    main: src/cl.cr
+
+crystal: '>= 1.13.2'
+
+license: MIT
