@@ -17,23 +17,37 @@ def parseWords(str : String) : Array(String)
   words = [] of String
   word = ""
 
+  hasQuote = false
   str.chars.each do |c|
     if c == '"'
       inString = !inString
+    elsif c == '\''
+      hasQuote = true
+      next
     end
+
     if inString
       word += c
     end
+
     unless inString
-      unless c == ' ' ||  c == '\n' ||  c == '(' ||  c == ')'
-        word += c
+      if hasQuote && c != '('
+        raise Exception.new("quote must be before bracket")
       end
-      if c == '('  || c == ')'
+      if c == '(' || c == ')'
         unless word.strip == ""
           words.push word
           word = ""
         end
-        words.push ("" + c)
+        if hasQuote
+          words.push ("'" + c)
+          hasQuote = false
+        else
+          words.push ("" + c)
+        end
+      end
+      unless c == ' ' ||  c == '\n' ||  c == '(' ||  c == ')'
+        word += c
       end
       if (c == ' ' || c == '\n') && word.strip != ""
         words.push word
@@ -48,6 +62,7 @@ def parse(words : Array(String)) : Array(Node | Leaf)
 
   nodes = [] of Node | Leaf
 
+  hasQuote = false
   inBrackets = false
   brCounter = 0
   sectionWords = [] of String
@@ -55,11 +70,24 @@ def parse(words : Array(String)) : Array(Node | Leaf)
     if word == "("
       inBrackets = true
       brCounter += 1
+    elsif word == "'("
+      if brCounter > 0
+        inBrackets= true
+        brCounter += 1
+      else
+        inBrackets= true
+        brCounter += 1
+        hasQuote = true
+      end
     elsif word == ")"
       brCounter -= 1
     end
 
     if inBrackets && brCounter == 0
+      if hasQuote
+        sectionWords[1...1] = "'"
+        hasQuote = false
+      end
       inBrackets = false
       nodes.push (Node.new (parse sectionWords[1..-1]))
       sectionWords = [] of String
