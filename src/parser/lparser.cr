@@ -1,4 +1,4 @@
-require "./interpreter/tree.cr"
+require "../interpreter/tree.cr"
 
 module LParser
   extend self

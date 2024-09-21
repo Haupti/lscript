@@ -1,5 +1,5 @@
-require "./lparser.cr"
-require "./leval.cr"
+require "./parser/lparser.cr"
+require "./interpreter/leval.cr"
 
 def main
   str = File.read(ARGV[0])

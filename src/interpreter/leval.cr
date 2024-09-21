@@ -1,7 +1,7 @@
-require "./lparser.cr"
-require "./interpreter/tree.cr"
-require "./interpreter/utils.cr"
-require "./interpreter/functions.cr"
+require "../parser/lparser.cr"
+require "./tree.cr"
+require "./utils.cr"
+require "./functions.cr"
 
 module LEval
   extend self

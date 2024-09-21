@@ -9,7 +9,7 @@ module Functions
     case str
     when "puts"
       return Function::PUTS
-    when "STRCONCAT"
+    when "str-concat"
       return Function::STRCONCAT
     else
       return nil
