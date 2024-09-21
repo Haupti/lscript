@@ -1,6 +1,7 @@
 require "./lparser.cr"
 require "./interpreter/tree.cr"
 require "./interpreter/utils.cr"
+require "./interpreter/functions.cr"
 
 module LEval
   extend self
@@ -31,6 +32,10 @@ module LEval
 
   def evalPutsWith(args : Array(Node | Leaf))
     puts (toString args)
+    evalOne(args[0])
+  end
+
+  def evalOne(arg : Node | Leaf)
   end
 
 end
