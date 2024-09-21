@@ -1,29 +1,38 @@
 require "./lparser.cr"
+require "./interpreter/tree.cr"
+require "./interpreter/utils.cr"
 
 module LEval
   extend self
-  def eval(content : Array(LParser::Node | LParser::Leaf))
+  def eval(content : Array(Node | Leaf))
     if content.size == 0
       return
     end
 
-    case content[0]
-    when LParser::Node
-      eval content[0].child
-    when LParser::Leaf
-      evalExpr content
+    first = content[0]
+    case first
+    when Node
+      eval first.children
+    when Leaf
+      evalExpr(first, content[1..-1])
     else
       raise "unhandled case #{content[0]}"
     end
   end
 
-  def evalExpr(leaf : Array(LParser::Node | LParser::Leaf))
-    # TODO
+  def evalExpr(head : Leaf, rest : Array(Node | Leaf))
+    case head.leaf
+    when "puts"
+      evalPutsWith rest
+    else
+      raise "unhandled case #{head.leaf}"
+    end
   end
 
-  def evalPutsWith(args : Array(LParser::Node | LParser::Leaf))
-    # TODO
+  def evalPutsWith(args : Array(Node | Leaf))
+    puts (toString args)
   end
+
 end
 
 
