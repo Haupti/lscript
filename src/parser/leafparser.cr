@@ -1,6 +1,8 @@
 
 module LeafParser
-  def parseLeaf(leaf : Leaf) : Atom
-    raise "not yet implemented"
+  extend self
+  def parseLeaf(leaf : Leaf) : LAtom
+    # TODO
+    raise "TODO"
   end
 end

@@ -1,7 +1,10 @@
 require "./tree.cr"
 
+
 module PreParser
   extend self
+
+  QUOTE_MARK = "quote"
 
   def parseWords(str : String) : Array(String)
     inString = false
@@ -77,7 +80,7 @@ module PreParser
 
       if inBrackets && brCounter == 0
         if hasQuote
-          sectionWords[1...1] = "'"
+          sectionWords[1...1] = QUOTE_MARK
           hasQuote = false
         end
         inBrackets = false
