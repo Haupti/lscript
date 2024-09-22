@@ -5,8 +5,8 @@ record LExpression, first : LAtom, arguments : Array(LData)
 alias LNumberType = Int64 | Float64 | Int32 | Float32
 record LNumber, value : LNumberType
 
-alias LAtomType = LNumber | String | LSymbol
-record LAtom, value = LAtomType
+record LString, value : String
+alias LAtom = LNumber | LString | LSymbol
 
 record LList, elems : Array(LData)
 
