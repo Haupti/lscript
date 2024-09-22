@@ -10,8 +10,12 @@ module LParser
     preparsed = PreParser.doParse(str)
 
     # parsing into language data
+    return parseMany(preparsed)
+  end
+
+  def parseMany(nodes : Array(Leaf | Node)) : Array(LData)
     data = [] of LData
-    preparsed.each do |node|
+    nodes.each do |node|
       case node
       when Node
         data << parseNode node
@@ -26,15 +30,31 @@ module LParser
 
   def parseNode(node : Node) : LData
     if node.children.size == 0
-      return [] of LData
+      return LList.new([] of LData)
     end
+
     first = node.children[0]
     case first
     when Leaf
       if first.leaf == PreParser::QUOTE_MARK
-        #TODO
+        return LList.new(parseMany node.children[1..-1])
+      else
+        firstLeaf = LeafParser.parseLeaf first
+        case firstLeaf
+        when String
+          raise "expected a symbol as first argument of an expression, but got String"
+        when LNumber
+          raise "expected a symbol as first argument of an expression, but got Number"
+        when LSymbol
+          return LExpression.new(firstLeaf, parseMany(node.children[1..-1]))
+        else
+          raise "BUG: expected Leaf type here"
+        end
       end
-      #TODO
+    when Node
+      raise "BUG: expected Leaf here"
+    else
+      raise "BUG: expected tree type here"
     end
   end
 end

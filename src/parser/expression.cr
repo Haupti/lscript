@@ -1,12 +1,15 @@
 record LSymbol, name : String
 
-record LExpression, first : LAtom, arguments : Array(LExpression)
+record LExpression, first : LAtom, arguments : Array(LData)
 
-alias LNumber = Int64 | Float64 | Int32 | Float32
+alias LNumberType = Int64 | Float64 | Int32 | Float32
+record LNumber, value : LNumberType
 
-alias LAtom = LNumber | String | LSymbol
+alias LAtomType = LNumber | String | LSymbol
+record LAtom, value = LAtomType
 
-alias LData = LAtom | Array(LData) | LExpression
+record LList, elems : Array(LData)
 
-alias LList = Array(LData)
+alias LData = LAtom | LList | LExpression
+
 
