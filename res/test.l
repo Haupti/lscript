@@ -1,4 +1,2 @@
-  (puts x)
-  (defun (say-hello name)
-    (puts (str-concat "(hello " name "!)"))
-  )
+  (let x 'testsym)
+  (let y '(x 1 2))

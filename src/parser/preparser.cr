@@ -16,9 +16,6 @@ module PreParser
     str.chars.each do |c|
       if c == '"'
         inString = !inString
-      elsif c == '\''
-        hasQuote = true
-        next
       end
 
       if inString
@@ -26,28 +23,55 @@ module PreParser
       end
 
       unless inString
-        if hasQuote && c != '('
-          raise Exception.new("quote must be before bracket")
+        # I quote end word and is added to next word
+        # II whitespaces end words and are ignored
+        # III brackets end words and are added as separate words
+        # IV only special: quote before bracket is added as quoted bracket word : '(
+
+
+        # I
+        if c == '\'' && word.strip != ""
+          words << word
+          word = "'"
+          next
+        elsif c == '\''
+          word = "'"
+          next
         end
+
+        # II
+        if (c == ' ' || c == '\n') && word.strip != ""
+          if word == "'"
+            raise "standalone quotes are not allowed"
+          end
+          words << word
+          word = ""
+          next
+        end
+
+        # III
         if c == '(' || c == ')'
-          unless word.strip == ""
-            words.push word
+          # IV
+          if c == '(' && word == "'"
+            words << "'("
             word = ""
-          end
-          if hasQuote
-            words.push ("'" + c)
-            hasQuote = false
+            next
+          elsif word.strip != ""
+            words << word
+            words << ("" + c)
+            word = ""
+            next
           else
-            words.push ("" + c)
+            words << ("" + c)
+            word = ""
+            next
           end
         end
-        unless c == ' ' ||  c == '\n' ||  c == '(' ||  c == ')'
+
+        unless c == ' ' || c == '\n'
           word += c
         end
-        if (c == ' ' || c == '\n') && word.strip != ""
-          words.push word
-          word = ""
-        end
+
       end
     end
     return words
@@ -55,6 +79,7 @@ module PreParser
 
   def parse(words : Array(String)) : Array(Node | Leaf)
 
+    puts words
     nodes = [] of Node | Leaf
 
     hasQuote = false

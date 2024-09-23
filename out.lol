@@ -1,1 +1,5 @@
-[LExpression(@first=LSymbol(@name="puts"), @arguments=[LSymbol(@name="x")]), LExpression(@first=LSymbol(@name="defun"), @arguments=[LExpression(@first=LSymbol(@name="say-hello"), @arguments=[LSymbol(@name="name")]), LExpression(@first=LSymbol(@name="puts"), @arguments=[LExpression(@first=LSymbol(@name="str-concat"), @arguments=[LString(@value="\"(hello \""), LSymbol(@name="name"), LString(@value="\"!)\"")])])])]
+["(", "let", "x", "'testsym", ")", "(", "let", "y", "'(", "x", "1", "2", ")", ")"]
+["let", "x", "'testsym"]
+["let", "y", "'(", "x", "1", "2", ")"]
+["quote", "x", "1", "2"]
+[LExpression(@first=LSymbol(@name="let"), @arguments=[LSymbol(@name="x"), LSymbol(@name="'testsym")]), LExpression(@first=LSymbol(@name="let"), @arguments=[LSymbol(@name="y"), LList(@elems=[LSymbol(@name="x"), LNumber(@value=1), LNumber(@value=2)])])]
