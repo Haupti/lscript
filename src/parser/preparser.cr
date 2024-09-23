@@ -12,7 +12,8 @@ module PreParser
     words = [] of String
     word = ""
 
-    hasQuote = false
+
+    inComment = false
     str.chars.each do |c|
       if c == '"'
         inString = !inString
@@ -23,11 +24,24 @@ module PreParser
       end
 
       unless inString
+        # 0 semicolon start comment until end of line or until next semicolon
         # I quote end word and is added to next word
         # II whitespaces end words and are ignored
         # III brackets end words and are added as separate words
         # IV only special: quote before bracket is added as quoted bracket word : '(
 
+        # 0
+        if c == ';'
+          inComment = !inComment;
+          next
+        end
+
+        if inComment && c == '\n'
+          inComment = false
+          next
+        elsif inComment
+          next
+        end
 
         # I
         if c == '\'' && word.strip != ""
@@ -78,8 +92,6 @@ module PreParser
   end
 
   def parse(words : Array(String)) : Array(Node | Leaf)
-
-    puts words
     nodes = [] of Node | Leaf
 
     hasQuote = false
