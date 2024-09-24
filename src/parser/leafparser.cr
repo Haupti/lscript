@@ -22,8 +22,10 @@ module LeafParser
       return LString.new leaf.leaf
     elsif leaf.leaf.includes? '"'
       raise "'\"' is not allowed in symbols"
-    else
+    elsif leaf.leaf.starts_with? "'"
       return LSymbol.new leaf.leaf
+    else
+      return LRef.new leaf.leaf
     end
     raise "BUG: how did i even get here?"
   end

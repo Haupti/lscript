@@ -40,10 +40,12 @@ module LParser
         firstLeaf = LeafParser.parseLeaf first
         case firstLeaf
         when LString
-          raise "expected a symbol as first argument of an expression, but got String"
+          raise "expected a identifier as first argument of an expression, but got string"
         when LNumber
-          raise "expected a symbol as first argument of an expression, but got Number"
+          raise "expected a identifier as first argument of an expression, but got number"
         when LSymbol
+          raise "expected a identifier as first argument of an expression, but got symbol"
+        when LRef
           return LExpression.new(firstLeaf, parseMany(node.children[1..-1]))
         else
           raise "BUG: expected Leaf type here but got '#{firstLeaf}'"
