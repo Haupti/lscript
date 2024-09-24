@@ -2,9 +2,9 @@ require "../parser/expression.cr"
 require "./buildin.cr"
 
 class EvaluationContext
-  @constants : Hash(String, LAtom) = Hash(String, LAtom).new
+  @constants : Hash(String, LValue | LRef) = Hash(String, LValue | LRef).new
   @functions : Hash(String, LRef) = Hash(String, LRef).new
-  @variables : Hash(String, LAtom) = Hash(String, LAtom).new
+  @variables : Hash(String, LValue | LRef) = Hash(String, LValue | LRef).new
 
 
   def hasFunction(ref : LRef) : Bool
@@ -12,14 +12,23 @@ class EvaluationContext
   end
 
   def evaluateFunction(ref : LRef, arguments : Array(LValue)) : LValue
-    raise "TODO"
+    raise "TODO" # TODO
   end
 
   def hasVariable(ref : LRef) : Bool
     return @variables[ref.name]? != nil
   end
 
-  def setVariable(ref : LRef, value : LValue)
+  def getVariableValue(ref : LRef) : LValue | LRef
+    val = @variables[ref.name]?
+    if val.nil?
+      raise "#{ref.name} not in scope"
+    else
+      return val
+    end
+  end
+
+  def setVariable(ref : LRef, value : LValue | LRef)
     @variables[ref.name] = value
   end
 
@@ -27,7 +36,16 @@ class EvaluationContext
     return @constants[ref.name]? != nil
   end
 
-  def setConstant(ref : LRef, value : LValue)
+  def getConstantValue(ref : LRef) : LValue | LRef
+    val = @constants[ref.name]?
+    if val.nil?
+      raise "#{ref.name} not in scope"
+    else
+      return val
+    end
+  end
+
+  def setConstant(ref : LRef, value : LValue | LRef)
     @constants[ref.name] = value
   end
 end
@@ -63,19 +81,42 @@ module Interpreter
 
   end
 
-  def evaluate(datum : LData, context : EvaluationContext) : LValue
-    raise "TODO"
+  def evaluate(datum : LData, context : EvaluationContext) : LValue | LRef
+    case datum
+    when LNumber
+      return datum
+    when LString
+      return datum
+    when LRef
+      if context.hasConstant datum
+        return context.getConstantValue datum
+      elsif context.hasVariable datum
+        return context.getVariableValue datum
+      elsif context.hasFunction datum
+        return datum
+      else
+        raise "#{datum.name} not in scope"
+      end
+    when LSymbol
+      return datum
+    when LList
+      return evaluateList(datum.elems, context)
+    when LExpression
+      return evaluateExpression(datum, context)
+    else
+      raise "unexpected data, cannot evaluate: #{datum}"
+    end
   end
 
   def evaluateList(datas : Array(LData), context : EvaluationContext) : Array(LValue)
-    raise "TODO"
+    raise "TODO" # TODO
   end
 
   def evaluateExpression(expr : LExpression, context : EvaluationContext) : LValue
     refName = expr.first.name
     case refName
     when "defun"
-      raise "TODO"
+      raise "TODO" # TODO
     when "def"
       if expr.arguments.size < 2 || expr.arguments.size > 2
         raise "def expects exactly two arguments"
@@ -124,7 +165,5 @@ module Interpreter
         raise "not in scope #{expr.first.name}"
       end
     end
-    raise "TODO"
-
   end
 end
