@@ -1,55 +1,6 @@
 require "../parser/expression.cr"
 require "./buildin.cr"
-
-class EvaluationContext
-  @constants : Hash(String, LValue | LRef) = Hash(String, LValue | LRef).new
-  @functions : Hash(String, LRef) = Hash(String, LRef).new
-  @variables : Hash(String, LValue | LRef) = Hash(String, LValue | LRef).new
-
-
-  def hasFunction(ref : LRef) : Bool
-    return @functions[ref.name]? != nil
-  end
-
-  def evaluateFunction(ref : LRef, arguments : Array(LValue)) : LValue
-    raise "TODO" # TODO
-  end
-
-  def hasVariable(ref : LRef) : Bool
-    return @variables[ref.name]? != nil
-  end
-
-  def getVariableValue(ref : LRef) : LValue | LRef
-    val = @variables[ref.name]?
-    if val.nil?
-      raise "#{ref.name} not in scope"
-    else
-      return val
-    end
-  end
-
-  def setVariable(ref : LRef, value : LValue | LRef)
-    @variables[ref.name] = value
-  end
-
-  def hasConstant(ref : LRef) : Bool
-    return @constants[ref.name]? != nil
-  end
-
-  def getConstantValue(ref : LRef) : LValue | LRef
-    val = @constants[ref.name]?
-    if val.nil?
-      raise "#{ref.name} not in scope"
-    else
-      return val
-    end
-  end
-
-  def setConstant(ref : LRef, value : LValue | LRef)
-    @constants[ref.name] = value
-  end
-end
-
+require "./evaluation_context.cr"
 
 module Interpreter
   extend self
@@ -116,7 +67,27 @@ module Interpreter
     refName = expr.first.name
     case refName
     when "defun"
-      raise "TODO" # TODO
+      if expr.arguments.size < 2
+        raise "defun expects at least two arguments"
+      elsif !expr.arguments[0].is_a? LExpression
+        raise "defun expects an expression as first argument"
+      elsif (expr.arguments[0].as LExpression).arguments.size < 1
+        raise "defun expects an expression as first argument with at least a valid function name"
+      end
+      callTemplate = expr.arguments[0].as LExpression
+      body = expr.arguments[1..]
+      if context.hasFunction callTemplate.first
+        raise "#{callTemplate.first.name} already in scope"
+      else
+        arguments : Array(LRef) = callTemplate.arguments.map do |arg|
+          if !(arg.is_a? LRef)
+            raise "defun function call template expects only valid argument names"
+          end
+          arg
+        end
+        context.setFunction(callTemplate.first, arguments, body)
+      end
+      return LNil.new
     when "def"
       if expr.arguments.size < 2 || expr.arguments.size > 2
         raise "def expects exactly two arguments"
