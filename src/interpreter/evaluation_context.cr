@@ -1,12 +1,9 @@
-record FunctionDefinition,
-  name : LRef,
-  arguments : Array(LRef),
-  body : Array(LData)
+require "./runtime_object_types.cr"
 
 class EvaluationContext
-  @constants : Hash(String, LValue | LRef) = Hash(String, LValue | LRef).new
+  @constants : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
   @functions : Hash(String, FunctionDefinition) = Hash(String, FunctionDefinition).new
-  @variables : Hash(String, LValue | LRef) = Hash(String, LValue | LRef).new
+  @variables : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
 
 
   def hasFunction(ref : LRef) : Bool
@@ -17,7 +14,7 @@ class EvaluationContext
     @functions[ref.name] = FunctionDefinition.new(ref, arguments, body)
   end
 
-  def evaluateFunction(ref : LRef, arguments : Array(LValue)) : LValue
+  def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : LValue
     raise "TODO" # TODO
   end
 
@@ -25,7 +22,7 @@ class EvaluationContext
     return @variables[ref.name]? != nil
   end
 
-  def getVariableValue(ref : LRef) : LValue | LRef
+  def getVariableValue(ref : LRef) : RuntimeValue
     val = @variables[ref.name]?
     if val.nil?
       raise "#{ref.name} not in scope"
@@ -34,7 +31,7 @@ class EvaluationContext
     end
   end
 
-  def setVariable(ref : LRef, value : LValue | LRef)
+  def setVariable(ref : LRef, value : RuntimeValue)
     @variables[ref.name] = value
   end
 
@@ -42,7 +39,7 @@ class EvaluationContext
     return @constants[ref.name]? != nil
   end
 
-  def getConstantValue(ref : LRef) : LValue | LRef
+  def getConstantValue(ref : LRef) : RuntimeValue
     val = @constants[ref.name]?
     if val.nil?
       raise "#{ref.name} not in scope"
@@ -51,7 +48,7 @@ class EvaluationContext
     end
   end
 
-  def setConstant(ref : LRef, value : LValue | LRef)
+  def setConstant(ref : LRef, value : RuntimeValue)
     @constants[ref.name] = value
   end
 end

@@ -1,6 +1,7 @@
 require "../parser/expression.cr"
 require "./buildin.cr"
 require "./evaluation_context.cr"
+require "./runtime_object_types.cr"
 
 module Interpreter
   extend self
@@ -32,26 +33,26 @@ module Interpreter
 
   end
 
-  def evaluate(datum : LData, context : EvaluationContext) : LValue | LRef
+  def evaluate(datum : LData, context : EvaluationContext) : RuntimeValue
     case datum
     when LNumber
-      return datum
+      return NumberValue.new datum.value
     when LString
-      return datum
+      return StringValue.new datum.value
     when LRef
       if context.hasConstant datum
         return context.getConstantValue datum
       elsif context.hasVariable datum
         return context.getVariableValue datum
       elsif context.hasFunction datum
-        return datum
+        return DefunRef.new datum.name
       else
         raise "#{datum.name} not in scope"
       end
     when LSymbol
-      return datum
+      return SymbolValue.new datum.name
     when LList
-      return evaluateList(datum.elems, context)
+      return ListObject.new evaluateList(datum.elems, context)
     when LExpression
       return evaluateExpression(datum, context)
     else
@@ -59,11 +60,37 @@ module Interpreter
     end
   end
 
-  def evaluateList(datas : Array(LData), context : EvaluationContext) : Array(LValue)
-    raise "TODO" # TODO
+  def evaluateList(datas : Array(LData), context : EvaluationContext) : Array(RuntimeValue)
+    evaluatedListElements = datas.map do |datum|
+      case datum
+      when LRef
+        if context.hasVariable datum
+          context.getVariableValue datum
+        elsif context.hasConstant datum
+          context.getConstantValue(datum)
+        elsif context.hasFunction datum
+          DefunRef.new datum.name
+        else
+          raise "unexpected no case matched while evaluating list (#{datum})"
+        end
+      when LNumber
+        NumberValue.new datum.value
+      when LSymbol
+        SymbolValue.new datum.name
+      when LString
+        StringValue.new datum.value
+      when LList
+        ListObject.new evaluateList(datum.elems, context)
+      when LExpression
+        evaluateExpression(datum, context)
+      else
+        raise "unexpected no case matched while evaluating a list (#{datum})"
+      end
+    end
+  return evaluatedListElements
   end
 
-  def evaluateExpression(expr : LExpression, context : EvaluationContext) : LValue
+  def evaluateExpression(expr : LExpression, context : EvaluationContext) : RuntimeValue
     refName = expr.first.name
     case refName
     when "defun"
@@ -87,7 +114,7 @@ module Interpreter
         end
         context.setFunction(callTemplate.first, arguments, body)
       end
-      return LNil.new
+      return NilValue.new
     when "def"
       if expr.arguments.size < 2 || expr.arguments.size > 2
         raise "def expects exactly two arguments"
@@ -99,7 +126,7 @@ module Interpreter
           raise "constant #{ref.name} already defined"
         end
         context.setConstant(ref, evaluate(expr.arguments[1], context))
-        return LNil.new
+        return NilValue.new
       end
     when "set"
       if expr.arguments.size < 2 || expr.arguments.size > 2
@@ -112,7 +139,7 @@ module Interpreter
           raise "variable #{ref.name} not defined"
         end
         context.setVariable(ref, evaluate(expr.arguments[1], context))
-        return LNil.new
+        return NilValue.new
       end
     when "let"
       if expr.arguments.size < 2 || expr.arguments.size > 2
@@ -125,13 +152,13 @@ module Interpreter
           raise "variable #{ref.name} already defined"
         end
         context.setVariable(ref, evaluate(expr.arguments[1], context))
-        return LNil.new
+        return NilValue.new
       end
     else
       if BuildIn.hasFunction expr.first
-        BuildIn.evaluateFunction(expr.first, evaluateList(expr.arguments, context))
+        return BuildIn.evaluateFunction(expr.first, evaluateList(expr.arguments, context))
       elsif context.hasFunction expr.first
-        context.evaluateFunction(expr.first, evaluateList(expr.arguments,context))
+        return context.evaluateFunction(expr.first, evaluateList(expr.arguments,context))
       else
         raise "not in scope #{expr.first.name}"
       end
