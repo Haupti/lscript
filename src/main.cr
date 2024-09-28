@@ -2,12 +2,14 @@ require "./parser/lparser.cr"
 require "./interpreter/interpreter.cr"
 
 def main
-  puts Time.utc.millisecond
   str = File.read(ARGV[0])
-  puts Time.utc.millisecond
+  before = Time.utc
   parsed = LParser.parse(str)
   Interpreter.run parsed
-  puts Time.utc.millisecond
+  after =  Time.utc
+
+  puts "#{before.millisecond}:#{before.nanosecond}"
+  puts "#{after.millisecond}:#{after.nanosecond}"
 end
 
 main

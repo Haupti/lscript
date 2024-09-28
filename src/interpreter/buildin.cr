@@ -6,7 +6,12 @@ module BuildIn
 
   class BuildIn
 
-    @fns = ["+", "-", "out", "mod", "debug", "to-str", "typeof", "eq?"];
+    @fns = [
+      "+", "-", "*", "/", "mod",
+      "out", "debug", "to-str", "typeof",
+      "contains?",
+      "eq?",
+    ];
 
     def hasFunction(ref : LRef) : Bool
       return @fns.includes? ref.name
@@ -22,6 +27,10 @@ module BuildIn
           return evaluateAdd(arguments)
         when "-"
           return evaluateMinus(arguments)
+        when "*"
+          return evaluateMultiply(arguments)
+        when "/"
+          return evaluateDivide(arguments)
         when "mod"
           return evaluateModulo(arguments)
         when "out"
@@ -32,6 +41,8 @@ module BuildIn
           return evaluateToStr(arguments)
         when "typeof"
           return evaluateType(arguments)
+        when "contains?"
+          return evaluateContains(arguments)
         when "eq?"
           return evaluateEquals(arguments)
         else
@@ -53,6 +64,39 @@ module BuildIn
         end
       end
       return NumberValue.new result
+    end
+
+    def evaluateMultiply(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size < 2
+        raise "'*' expects at least two arguments"
+      end
+      result = 0
+      fst = arguments[0]
+      if fst.is_a? NumberValue
+        result = fst.value
+      end
+      arguments[1..].each do |arg|
+        if arg.is_a? NumberValue
+          result += arg.value
+        else
+          raise "'*' expects number arguments but got #{arg}"
+        end
+      end
+      return NumberValue.new result
+    end
+
+    def evaluateDivide(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 2
+        raise "'/' expects exaclty two arguments"
+      end
+      fst = arguments[0]
+      snd = arguments[1]
+      if !(fst.is_a? NumberValue && snd.is_a? NumberValue)
+        raise "'/' expects two integer arguments but got '#{fst}' and '#{snd}'"
+      end
+      fstVal = fst.value
+      sndVal = snd.value
+      return NumberValue.new (fstVal / sndVal)
     end
 
     def evaluateMinus(arguments : Array(RuntimeValue)) : RuntimeValue
@@ -145,6 +189,23 @@ module BuildIn
       end
       puts result
       return NilValue.new
+    end
+
+    def evaluateContains(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 2
+        raise "'contains?' expects two arguments"
+      end
+      fst = arguments[0]
+      snd = arguments[1]
+      if !fst.is_a? ListObject
+        raise "'contains?' expects a list as fist argument"
+      end
+      fst.elems.each do |elem|
+        if elem == snd
+          return SymbolValue.trueValue
+        end
+      end
+      return SymbolValue.falseValue
     end
 
     def evaluateEquals(arguments : Array(RuntimeValue)) : RuntimeValue

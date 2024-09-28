@@ -45,7 +45,10 @@ def rtvToStr(rtv : RuntimeValue) : String
     return "nil"
   when ListObject
     result = "'("
-    rtv.elems.each do |elem|
+    if rtv.elems.size > 0
+      result += "#{rtvToStr(rtv.elems[0])}"
+    end
+    rtv.elems[1..].each do |elem|
       result += " #{rtvToStr(elem)}"
     end
     result += ")"

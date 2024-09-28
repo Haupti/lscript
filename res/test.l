@@ -1,6 +1,6 @@
 ; comment
 
-(let x 2)
+(let x 1)
 (let y 5)
 (defun (fizzbuzz a)
   (if (eq? (mod a 3) (mod a 5) 0) "fizzbuzz" 
@@ -14,3 +14,5 @@
 (out (fizzbuzz 5))
 (out (fizzbuzz 3))
 (out (fizzbuzz 2))
+
+(out (contains? '(x 2 3) 1))
