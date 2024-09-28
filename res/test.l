@@ -2,9 +2,8 @@
 
 (let x 2)
 (let y 5)
-(defun (add a b)
-  (out (- a b))
-  (out (mod a b))
+(defun (fizzbuzz a)
+  (out (eq? (mod a 3) (mod a 5) 0))
 )
 
-(add x y)
+(fizzbuzz 15)

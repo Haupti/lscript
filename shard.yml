@@ -8,6 +8,6 @@ targets:
   cl:
     main: src/main.cr
 
-crystal: '>= 1.13.2'
+crystal: '>= 1.13.3'
 
 license: MIT

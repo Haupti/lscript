@@ -6,7 +6,7 @@ module BuildIn
 
   class BuildIn
 
-    @fns = ["+", "-", "out", "mod"];
+    @fns = ["+", "-", "out", "mod", "debug", "to-str", "typeof", "eq?"];
 
     def hasFunction(ref : LRef) : Bool
       return @fns.includes? ref.name
@@ -22,10 +22,18 @@ module BuildIn
           return evaluateAdd(arguments)
         when "-"
           return evaluateMinus(arguments)
-        when "out"
-          return evaluateOut(arguments)
         when "mod"
           return evaluateModulo(arguments)
+        when "out"
+          return evaluateOut(arguments)
+        when "debug"
+          return evaluateDebug(arguments)
+        when "to-str"
+          return evaluateToStr(arguments)
+        when "typeof"
+          return evaluateType(arguments)
+        when "eq?"
+          return evaluateEquals(arguments)
         else
           raise "#{ref.name} not in scope"
         end
@@ -94,10 +102,65 @@ module BuildIn
       end
       result = ""
       arguments.each do |arg|
+          result += "#{rtvToStr(arg)}"
+      end
+      puts result
+      return NilValue.new
+    end
+
+    def evaluateToStr(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 1
+        raise "'to-str' expects one arguments"
+      end
+      return StringValue.new rtvToStr(arguments[0])
+    end
+
+    def evaluateType(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 1
+        raise "'typeof' expects one arguments"
+      end
+      arg = arguments[0]
+      case arg
+      when StringValue
+        return StringValue.new "string"
+      when NumberValue
+        return StringValue.new "number"
+      when SymbolValue
+        return StringValue.new "symbol"
+      when ListObject
+        return StringValue.new "list"
+      when DefunRef
+        return StringValue.new "function-reference"
+      when NilValue
+        return StringValue.new "nil"
+      else
+        raise "unexpected no case matched while evaluating type"
+      end
+    end
+
+    def evaluateDebug(arguments : Array(RuntimeValue)) : RuntimeValue
+      result = ""
+      arguments.each do |arg|
           result += "#{arg}"
       end
       puts result
       return NilValue.new
+    end
+
+    def evaluateEquals(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size < 2
+        raise "'=' expects at least two arguments"
+      end
+      result = true
+      first = arguments[0]
+      arguments[1..].each do |arg|
+        result = first == arg
+      end
+      if result
+        return SymbolValue.trueValue
+      else
+        return SymbolValue.falseValue
+      end
     end
   end
 
