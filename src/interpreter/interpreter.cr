@@ -145,7 +145,7 @@ module Interpreter
         return NilValue.new
       end
     when "let"
-      if expr.arguments.size < 2 || expr.arguments.size > 2
+      if expr.arguments.size != 2
         raise "let expects exactly two arguments"
       elsif !expr.arguments[0].is_a? LRef
         raise "let expects a identifier as first argument"
@@ -157,6 +157,25 @@ module Interpreter
         context.setVariable(ref, evaluate(expr.arguments[1], context))
         return NilValue.new
       end
+    when "if"
+      if expr.arguments.size != 3
+        raise "'if' expects exactly three arguments"
+      end
+      cond = evaluate(expr.arguments[0], context)
+      trueVal = expr.arguments[1]
+      falseVal = expr.arguments[2]
+      if cond.is_a? SymbolValue
+        if cond.name == TRUE
+        return evaluate(trueVal, context)
+        elsif cond.name == FALSE
+          return evaluate(falseVal, context)
+        else
+          raise "'if' expects '#t or '#f as first argument value"
+        end
+      else
+          raise "'if' expects '#t or '#f as first argument value"
+      end
+
     else
       if BuildIn::INSTANCE.hasFunction expr.first
         return BuildIn::INSTANCE.evaluateFunction(expr.first, evaluateList(expr.arguments, context))

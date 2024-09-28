@@ -155,6 +155,9 @@ module BuildIn
       first = arguments[0]
       arguments[1..].each do |arg|
         result = first == arg
+        if !result
+          return SymbolValue.falseValue
+        end
       end
       if result
         return SymbolValue.trueValue

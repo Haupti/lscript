@@ -1,3 +1,6 @@
+TRUE = "'#t"
+FALSE = "'#f"
+
 record FunctionDefinition,
   name : LRef,
   arguments : Array(LRef),
@@ -14,10 +17,10 @@ record StringValue,
 
 record SymbolValue, name : String do
   def self.trueValue
-    return SymbolValue.new "'#t"
+    return SymbolValue.new TRUE
   end
   def self.falseValue
-    return SymbolValue.new "'#f"
+    return SymbolValue.new FALSE
   end
 end
 
