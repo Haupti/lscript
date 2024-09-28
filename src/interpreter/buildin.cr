@@ -4,6 +4,21 @@ require "./runtime_object_types.cr"
 module BuildIn
   extend self
 
+  # TODO build-in functions to implement
+  # >, >=
+  # <, <=
+  # get element of list
+  # size of list
+  # sublist
+  # map list
+  # foreach list
+  # filter list
+  # concat lists
+  # string substring
+  # string contains substring
+  # string concat
+  # string replace
+
   class BuildIn
 
     @fns = [
