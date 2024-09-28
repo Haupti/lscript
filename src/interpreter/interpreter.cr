@@ -29,7 +29,7 @@ module Interpreter
       when LList
         result = evaluate(datum, context)
       else
-        raise "what?"
+        raise "unexpected no case matched while top level evaluation #{datum}"
       end
     end
     return result
