@@ -5,7 +5,7 @@ def main
   str = File.read(ARGV[0])
   parsed = LParser.parse(str)
   puts parsed
-  Interpreter.run parsed
+  puts (Interpreter.run parsed)
 end
 
 main

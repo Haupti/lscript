@@ -6,7 +6,7 @@ require "./runtime_object_types.cr"
 module Interpreter
   extend self
 
-  def run(code : Array(LData))
+  def run(code : Array(LData)) : RuntimeValue
 
     # Special makros that are required to make the programming language
 
@@ -19,17 +19,20 @@ module Interpreter
 
     context = EvaluationContext.new
     # top level code: only evaluate expressions
+    result : RuntimeValue = NilValue.new
     code.each do |datum|
       case datum
       when LExpression
-        evaluateExpression(datum, context)
+        result = evaluateExpression(datum, context)
       when LAtom
-        next
+        result = evaluate(datum, context)
       when LList
-        next
+        result = evaluate(datum, context)
+      else
+        raise "what?"
       end
-
     end
+    return result
 
   end
 
@@ -155,8 +158,8 @@ module Interpreter
         return NilValue.new
       end
     else
-      if BuildIn.hasFunction expr.first
-        return BuildIn.evaluateFunction(expr.first, evaluateList(expr.arguments, context))
+      if BuildIn::INSTANCE.hasFunction expr.first
+        return BuildIn::INSTANCE.evaluateFunction(expr.first, evaluateList(expr.arguments, context))
       elsif context.hasFunction expr.first
         return context.evaluateFunction(expr.first, evaluateList(expr.arguments,context))
       else

@@ -1,5 +1,9 @@
-  ; comment
-  (let x 'testsym)
-  (let y ;hell yeah; '(x 1 2))
-  (let z '1) ; lol
-  (let a z)
+; comment
+
+(let x 2)
+(let y 5)
+(defun (add a b)
+  (+ a b)
+)
+
+(add x y)
