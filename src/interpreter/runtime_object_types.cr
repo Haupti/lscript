@@ -26,6 +26,10 @@ end
 
 record NilValue
 
+# TODO add an error value type which will be returned on all failed operations instead of an error
+# program should only 'panic' if an error is received as argument to any function except:
+# error related functions, these obviously dont panic if they receive an error
+
 record ListObject,
   elems : Array(RuntimeValue)
 

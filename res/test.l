@@ -16,3 +16,6 @@
 (out (fizzbuzz 2))
 
 (out (contains? '(x 2 3) 1))
+
+(debug (str-concat "a" "b"))
+(debug (str-contains? "cab" "a"))

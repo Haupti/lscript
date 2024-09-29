@@ -19,7 +19,7 @@ module LeafParser
           end
         end
     elsif leaf.leaf.starts_with?('"') && leaf.leaf.ends_with?('"')
-      return LString.new leaf.leaf
+      return LString.new leaf.leaf[1..-2]
     elsif leaf.leaf.includes? '"'
       raise "'\"' is not allowed in symbols"
     elsif leaf.leaf.starts_with? "'"
