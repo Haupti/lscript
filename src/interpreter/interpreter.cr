@@ -1,5 +1,5 @@
 require "../parser/expression.cr"
-require "./buildin.cr"
+require "./buildin/buildin.cr"
 require "./evaluation_context.cr"
 require "./runtime_object_types.cr"
 
