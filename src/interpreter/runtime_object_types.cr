@@ -33,7 +33,11 @@ record NilValue
 record ListObject,
   elems : Array(RuntimeValue)
 
-alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | DefunRef | NilValue
+record ErrorValue,
+  reason : String
+
+
+alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | DefunRef | NilValue | ErrorValue
 
 def rtvToStr(rtv : RuntimeValue) : String
   case rtv
@@ -59,6 +63,8 @@ def rtvToStr(rtv : RuntimeValue) : String
     end
     result += ")"
     return result
+  when ErrorValue
+    return "(error \"#{rtv.reason}\")"
   else
     raise "unexpected no case matched while converting to string"
   end

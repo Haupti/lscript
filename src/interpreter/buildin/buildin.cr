@@ -13,9 +13,8 @@ module BuildIn
   # read file / write file
   # tcp server
   # http server
+  # parse number
   # get element of list
-  # foreach list
-  # filter list
   # char-at char of string at position
 
   class BuildIn
@@ -23,8 +22,8 @@ module BuildIn
     @fns = [
       "+", "-", "*", "/", "mod", "lt?", "lte?", "gt?", "gte?", # number stuff
       "and", "or", "not", # bool stuff
-      "out", "debug", "to-str", "typeof", # weird stuff
-      "contains?", "length", "sublist", "map", "concat", "head", "tail", # list stuff
+      "out", "debug", "to-str", "typeof", "err", "err?", "err-reason", # weird stuff
+      "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", # string stuff
     ];
@@ -79,6 +78,10 @@ module BuildIn
           return ListBuildin.evaluateHead(arguments)
         when "tail"
           return ListBuildin.evaluateTail(arguments)
+        when "filter"
+          return ListBuildin.evaluateFilter(arguments, context)
+        when "get"
+          return ListBuildin.evaluateGet(arguments)
         when "str-concat"
           return StringBuildin.evaluateStrConcat(arguments)
         when "str-replace"
@@ -99,6 +102,12 @@ module BuildIn
           return evaluateToStr(arguments)
         when "typeof"
           return evaluateType(arguments)
+        when "err"
+          return evaluateError(arguments)
+        when "err?"
+          return evaluateIsError(arguments)
+        when "err-reason"
+          return evaluateErrorReason(arguments)
         else
           raise "#{ref.name} not in scope"
         end
@@ -162,6 +171,39 @@ module BuildIn
       else
         return SymbolValue.falseValue
       end
+    end
+
+    def evaluateError(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 1
+        raise "'err' expects one argument"
+      end
+      fst = arguments[0]
+      if !fst.is_a? StringValue
+        raise "'err' expects a string argument"
+      end
+      return ErrorValue.new fst.value
+    end
+
+    def evaluateIsError(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 1
+        raise "'err?' expects one arguments"
+      end
+      if arguments[0].is_a? ErrorValue
+        return SymbolValue.trueValue
+      else
+        return SymbolValue.falseValue
+      end
+    end
+
+    def evaluateErrorReason(arguments : Array(RuntimeValue)) : RuntimeValue
+      if arguments.size != 1
+        raise "'err-reason' expects one arguments"
+      end
+      fst = arguments[0]
+      if !fst.is_a? ErrorValue
+        raise "'err-reason' expects an error value as argument"
+      end
+      return StringValue.new fst.reason
     end
 
   end

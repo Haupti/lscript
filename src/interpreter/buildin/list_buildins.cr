@@ -31,6 +31,29 @@ module ListBuildin
     end
   end
 
+  def evaluateGet(arguments : Array(RuntimeValue)) : RuntimeValue
+    if arguments.size != 2
+      raise "'get' expects two argument"
+    end
+    fst = arguments[0]
+    snd = arguments[1]
+    if !fst.is_a? ListObject
+      raise "'get' expects a list as first argument"
+    elsif snd.is_a? NumberValue
+      sndVal : Int64 | Int32 | Float64 | Float32 = snd.value
+      if sndVal.integer?
+        if fst.elems.size <= sndVal
+          raise "'get' index out of bounds: element #{sndVal} but length #{fst.elems.size}"
+        end
+        return fst.elems[sndVal.as Int]
+      else
+        raise "'get' expects an integer as second argument"
+      end
+    else
+      raise "'get' expects integer as second argument"
+    end
+  end
+
   def evaluateConcat(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 2
       raise "'concat' expects two arguments"
@@ -67,6 +90,39 @@ module ListBuildin
     results = [] of RuntimeValue
     snd.elems.each do |elem|
       results << context.evaluateFunction(fst, [elem])
+    end
+    return ListObject.new results
+  end
+
+  def evaluateFilter(arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+    if arguments.size != 2
+      raise "'filter' expects two arguments"
+    end
+    fst = arguments[0]
+    snd = arguments[1]
+    if !fst.is_a? DefunRef
+      raise "'filter' expects a function as first argument"
+    end
+    if !snd.is_a? ListObject
+      raise "'filter' expects a list as second argument"
+    end
+
+    if !context.hasFunction(fst)
+      raise "'#{fst.name}' is not in scope"
+    end
+
+    results = [] of RuntimeValue
+    snd.elems.each do |elem|
+      predicateResult = context.evaluateFunction(fst, [elem])
+      if !predicateResult.is_a? SymbolValue
+        raise "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol"
+      elsif predicateResult.name == TRUE
+        results << elem
+      elsif predicateResult.name == FALSE
+        next
+      else
+        raise "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol"
+      end
     end
     return ListObject.new results
   end

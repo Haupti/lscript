@@ -27,3 +27,13 @@
 (out (tail '()))
 (out (tail '(1)))
 (out (tail '(1 2)))
+
+(defun (lt5filter num)
+  (if (lt? num 5) '#t '#f)
+)
+(out (filter lt5filter '(1 2 3 4 5 6)))
+(out (get '(1 2) 1))
+
+(out (err "hi"))
+(out (err? (err "hi")))
+(out (err-reason (err "hi")))
