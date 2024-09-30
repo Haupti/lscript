@@ -16,7 +16,6 @@ module BuildIn
   # get element of list
   # foreach list
   # filter list
-  # car cdr
   # char-at chat et string position
 
   class BuildIn
@@ -25,7 +24,7 @@ module BuildIn
       "+", "-", "*", "/", "mod", "lt?", "lte?", "gt?", "gte?", # number stuff
       "and", "or", "not", # bool stuff
       "out", "debug", "to-str", "typeof", # weird stuff
-      "contains?", "length", "sublist", "map", "concat", # list stuff
+      "contains?", "length", "sublist", "map", "concat", "head", "tail", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", # string stuff
     ];
@@ -76,6 +75,10 @@ module BuildIn
           return ListBuildin.evaluateMap(arguments, context)
         when "length"
           return ListBuildin.evaluateLength(arguments)
+        when "head"
+          return ListBuildin.evaluateHead(arguments)
+        when "tail"
+          return ListBuildin.evaluateTail(arguments)
         when "str-concat"
           return StringBuildin.evaluateStrConcat(arguments)
         when "str-replace"

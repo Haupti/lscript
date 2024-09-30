@@ -3,6 +3,34 @@ require "../function_evaluator.cr"
 module ListBuildin
   extend self
 
+  def evaluateTail(arguments : Array(RuntimeValue)) : RuntimeValue
+    if arguments.size != 1
+      raise "'tail' expects one argument"
+    end
+    fst = arguments[0]
+    if !fst.is_a? ListObject
+      raise "'tail' expects a list as first argument"
+    elsif fst.elems.size <= 1
+      return ListObject.new ([] of RuntimeValue)
+    else
+      return ListObject.new fst.elems[1..]
+    end
+  end
+
+  def evaluateHead(arguments : Array(RuntimeValue)) : RuntimeValue
+    if arguments.size != 1
+      raise "'head' expects one argument"
+    end
+    fst = arguments[0]
+    if !fst.is_a? ListObject
+      raise "'head' expects a list as first argument"
+    elsif fst.elems.size == 0
+      raise "'head' expects a non-empty list as first argument"
+    else
+      return ListObject.new [fst.elems[0]]
+    end
+  end
+
   def evaluateConcat(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 2
       raise "'concat' expects two arguments"
@@ -10,7 +38,7 @@ module ListBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? ListObject
-      raise "'concat' expects a function as first argument"
+      raise "'concat' expects a list as first argument"
     end
     if !snd.is_a? ListObject
       raise "'concat' expects a list as second argument"
