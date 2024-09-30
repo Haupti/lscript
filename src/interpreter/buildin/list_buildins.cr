@@ -1,5 +1,47 @@
+require "../function_evaluator.cr"
+
 module ListBuildin
   extend self
+
+  def evaluateConcat(arguments : Array(RuntimeValue)) : RuntimeValue
+    if arguments.size != 2
+      raise "'concat' expects two arguments"
+    end
+    fst = arguments[0]
+    snd = arguments[1]
+    if !fst.is_a? ListObject
+      raise "'concat' expects a function as first argument"
+    end
+    if !snd.is_a? ListObject
+      raise "'concat' expects a list as second argument"
+    end
+
+    return ListObject.new (fst.elems + snd.elems)
+  end
+
+  def evaluateMap(arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+    if arguments.size != 2
+      raise "'map' expects two arguments"
+    end
+    fst = arguments[0]
+    snd = arguments[1]
+    if !fst.is_a? DefunRef
+      raise "'map' expects a function as first argument"
+    end
+    if !snd.is_a? ListObject
+      raise "'map' expects a list as second argument"
+    end
+
+    if !context.hasFunction(fst)
+      raise "'#{fst.name}' is not in scope"
+    end
+
+    results = [] of RuntimeValue
+    snd.elems.each do |elem|
+      results << context.evaluateFunction(fst, [elem])
+    end
+    return ListObject.new results
+  end
 
   def evaluateLength(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 1

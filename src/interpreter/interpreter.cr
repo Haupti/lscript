@@ -178,7 +178,7 @@ module Interpreter
 
     else
       if BuildIn::INSTANCE.hasFunction expr.first
-        return BuildIn::INSTANCE.evaluateFunction(expr.first, evaluateList(expr.arguments, context))
+        return BuildIn::INSTANCE.evaluateFunction(expr.first, evaluateList(expr.arguments, context), context)
       elsif context.hasFunction expr.first
         return context.evaluateFunction(expr.first, evaluateList(expr.arguments,context))
       else

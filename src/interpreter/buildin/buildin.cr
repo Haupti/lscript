@@ -14,10 +14,9 @@ module BuildIn
   # tcp server
   # http server
   # get element of list
-  # map list
   # foreach list
   # filter list
-  # concat lists
+  # car cdr
   # char-at chat et string position
 
   class BuildIn
@@ -26,16 +25,16 @@ module BuildIn
       "+", "-", "*", "/", "mod", "lt?", "lte?", "gt?", "gte?", # number stuff
       "and", "or", "not", # bool stuff
       "out", "debug", "to-str", "typeof", # weird stuff
-      "contains?", "length", "sublist", # list stuff
+      "contains?", "length", "sublist", "map", "concat", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", # string stuff
     ];
 
-    def hasFunction(ref : LRef) : Bool
+    def hasFunction(ref : LRef | DefunRef) : Bool
       return @fns.includes? ref.name
     end
 
-    def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateFunction(ref : LRef | DefunRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
       found = @fns.includes? ref.name
       if !found
         raise "#{ref.name} not in scope"
@@ -71,6 +70,10 @@ module BuildIn
           return ListBuildin.evaluateContains(arguments)
         when "sublist"
           return ListBuildin.evaluateSublist(arguments)
+        when "concat"
+          return ListBuildin.evaluateConcat(arguments)
+        when "map"
+          return ListBuildin.evaluateMap(arguments, context)
         when "length"
           return ListBuildin.evaluateLength(arguments)
         when "str-concat"

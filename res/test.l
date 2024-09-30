@@ -17,5 +17,8 @@
 
 (out (contains? '(x 2 3) 1))
 
-(debug (str-concat "a" "b"))
-(debug (str-contains? "cab" "a"))
+(out (str-concat "a" "b"))
+(out (str-contains? "cab" "a"))
+
+(out (map fizzbuzz '(1 2 3 4 5)))
+(out (concat '(3 2 1 0) '(1 2 3 4 5)))

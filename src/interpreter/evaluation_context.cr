@@ -7,7 +7,7 @@ class EvaluationContext
   @variables : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
 
 
-  def hasFunction(ref : LRef) : Bool
+  def hasFunction(ref : LRef | DefunRef) : Bool
     return @functions[ref.name]? != nil
   end
 
@@ -15,11 +15,11 @@ class EvaluationContext
     @functions[ref.name] = FunctionDefinition.new(ref, arguments, body)
   end
 
-  def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
+  def evaluateFunction(ref : LRef | DefunRef, arguments : Array(RuntimeValue)) : RuntimeValue
     if hasFunction(ref)
       return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments, self)
     elsif BuildIn::INSTANCE.hasFunction(ref)
-      return BuildIn::INSTANCE.evaluateFunction(ref, arguments)
+      return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
     else
       raise "#{ref.name} not in scope"
     end
@@ -79,7 +79,7 @@ class FunctionScope < EvaluationContext
     if @parent.hasFunction(ref)
       return @parent.evaluateFunction(ref, arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
-      return BuildIn::INSTANCE.evaluateFunction(ref, arguments)
+      return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
     else
       raise "#{ref.name} not in scope"
     end
