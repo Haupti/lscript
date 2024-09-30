@@ -22,3 +22,8 @@
 
 (out (map fizzbuzz '(1 2 3 4 5)))
 (out (concat '(3 2 1 0) '(1 2 3 4 5)))
+(out (head '(32 1)))
+(out (head '(1)))
+(out (tail '()))
+(out (tail '(1)))
+(out (tail '(1 2)))

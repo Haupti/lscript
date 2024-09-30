@@ -16,7 +16,7 @@ module BuildIn
   # get element of list
   # foreach list
   # filter list
-  # char-at chat et string position
+  # char-at char of string at position
 
   class BuildIn
 
