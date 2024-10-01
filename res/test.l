@@ -37,3 +37,5 @@
 (out (err "hi"))
 (out (err? (err "hi")))
 (out (err-reason (err "hi")))
+
+(out (char-at "hallo" 2))

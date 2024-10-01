@@ -55,6 +55,29 @@ module StringBuildin
     end
   end
 
+  def evaluateCharAt(arguments : Array(RuntimeValue)) : RuntimeValue
+    if arguments.size != 2
+      raise "'char-at' expects two arguments"
+    end
+    fst = arguments[0]
+    snd = arguments[1]
+    if !fst.is_a? StringValue
+      raise "'char-at' expects a string as first argument"
+    elsif snd.is_a? NumberValue
+      sndVal : Int64 | Int32 | Float64 | Float32 = snd.value
+      if sndVal.integer?
+        if fst.value.size <= sndVal
+          raise "'char-at' index out of bounds: char-at #{sndVal} but length #{fst.value.size}"
+        end
+        return StringValue.new "#{fst.value[sndVal.as Int]}"
+      else
+        raise "'chat-at' expects an integer as second argument"
+      end
+    else
+      raise "'chat-at' expects integer as second argument"
+    end
+  end
+
   def evaluateStrReplace(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 3
       raise "'str-replace' expects three arguments"
@@ -63,7 +86,7 @@ module StringBuildin
     snd = arguments[1]
     trd = arguments[2]
     unless fst.is_a? StringValue && snd.is_a? StringValue && trd.is_a? StringValue
-      raise "'substr' expects only string argmuments"
+      raise "'str-replace' expects only string argmuments"
     else
       return StringValue.new fst.value.sub(snd.value, trd.value)
     end
@@ -71,13 +94,13 @@ module StringBuildin
 
   def evaluateStrReplaceAll(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 3
-      raise "'str-replace' expects three arguments"
+      raise "'str-replace-all' expects three arguments"
     end
     fst = arguments[0]
     snd = arguments[1]
     trd = arguments[2]
     unless fst.is_a? StringValue && snd.is_a? StringValue && trd.is_a? StringValue
-      raise "'substr' expects only string argmuments"
+      raise "'str-replace-all' expects only string argmuments"
     else
       return StringValue.new fst.value.gsub(snd.value, trd.value)
     end

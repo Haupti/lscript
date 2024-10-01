@@ -11,10 +11,10 @@ module BuildIn
 
   # TODO build-in functions to implement
   # read file / write file
-  # tcp server
-  # http server
+  # user input
+  # program arguments
+  # sockets
   # parse number
-  # get element of list
   # char-at char of string at position
 
   class BuildIn
@@ -25,7 +25,7 @@ module BuildIn
       "out", "debug", "to-str", "typeof", "err", "err?", "err-reason", # weird stuff
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
-      "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", # string stuff
+      "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
     ];
 
     def hasFunction(ref : LRef | DefunRef) : Bool
@@ -94,6 +94,8 @@ module BuildIn
           return StringBuildin.evaluateStrLength(arguments)
         when "substr"
           return StringBuildin.evaluateSubstr(arguments)
+        when "char-at"
+          return StringBuildin.evaluateCharAt(arguments)
         when "eq?"
           return evaluateEquals(arguments)
         when "debug"
