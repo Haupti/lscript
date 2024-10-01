@@ -15,14 +15,14 @@ module BuildIn
   # program arguments
   # sockets
   # parse number
-  # char-at char of string at position
 
   class BuildIn
 
     @fns = [
       "+", "-", "*", "/", "mod", "lt?", "lte?", "gt?", "gte?", # number stuff
       "and", "or", "not", # bool stuff
-      "out", "debug", "to-str", "typeof", "err", "err?", "err-reason", # weird stuff
+      "debug", "to-str", "typeof", "err", "err?", "err-reason", # weird stuff
+      "out", "get-input", # io stuff
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
@@ -64,6 +64,8 @@ module BuildIn
           return SymbolBuildin.evaluateNot(arguments)
         when "out"
           return IOBuildin.evaluateOut(arguments)
+        when "get-input"
+          return IOBuildin.evaluateGetInput(arguments)
         when "contains?"
           return ListBuildin.evaluateContains(arguments)
         when "sublist"

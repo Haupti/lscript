@@ -39,3 +39,6 @@
 (out (err-reason (err "hi")))
 
 (out (char-at "hallo" 2))
+
+(let asdf (get-input))
+(out asdf)

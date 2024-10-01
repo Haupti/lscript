@@ -1,5 +1,5 @@
-
 require "./error_guardian.cr"
+
 module IOBuildin
   extend self
 
@@ -10,6 +10,15 @@ module IOBuildin
     end
     puts result
     return NilValue.new
+  end
+
+  def evaluateGetInput(arguments : Array(RuntimeValue)) : RuntimeValue
+    result = gets
+    if result.nil?
+      return NilValue.new
+    else
+      return StringValue.new result
+    end
   end
 
 end
