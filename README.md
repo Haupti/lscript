@@ -20,6 +20,42 @@ you quote the first bracket:
 (+ 1 2) ; -> 3
 ```
 
+## keywords
+currently there are only very few keywords, and i like to keep the list short.
+these are:
+* defun
+* def
+* let 
+* set
+* if
+* ;
+
+### defining stuff
+examples speak more that lots of text:
+```
+; functions
+(defun (add-one a) (+ a 1))
+(add-one 1) ; -> 2
+
+; constants
+(def a 5)
+(add-one a) ; -> 6
+
+; variables
+(let b 3)
+(add-one b) ; -> 4
+(set b 8)
+(add-one b) ; -> 9
+
+; comments, heh
+; this is a comment
+
+; if
+(if (lt? 5 3) (out "5 is less than 3") (out "3 is less than 5")) ; -> prints "3 is less than 5" to stdout
+; special behaviour here is, that the first conditional expression is not evaluated unless the condition is '#t
+```
+
+
 ## build-in functions
 these functions are available without importing anything (which at the moment is not possible at all).
 here is simply a list of functions that exist:
@@ -84,15 +120,17 @@ these functions expect the true or false symbols
 * read file & write file
 * program arguments
 * env vars
+* eval which evaluates symbols -> 
 * network: tcp / http / socket ?
 * parse number
 
 ### features
 * modules
-* structs
+* table / hashmap / dictionary / object or something like this
 * lambdas
-* hashmap?
+* parser remembers row and column of stuff so panics are more helpful
 * type verification
+* macros (either the c-like ones or better, but this is really for the future)
 
 ### about the planned features: modules
 the idea here is, that modules are imported into a variable.\
