@@ -11,9 +11,8 @@ module BuildIn
 
   # TODO build-in functions to implement
   # read file / write file
-  # user input
   # program arguments
-  # sockets
+  # sockets: tcp / http ?
   # parse number
 
   class BuildIn
