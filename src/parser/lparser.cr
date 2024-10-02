@@ -52,9 +52,9 @@ module LParser
         end
       end
     when Node
-      raise "BUG: expected Leaf here"
+      raise "BUG: expected Leaf here but got node '#{first}'"
     else
-      raise "BUG: expected tree type here"
+      raise "BUG: expected tree type here but got '#{first}'"
     end
   end
 end

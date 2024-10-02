@@ -101,8 +101,6 @@ module Interpreter
         raise "defun expects at least two arguments"
       elsif !expr.arguments[0].is_a? LExpression
         raise "defun expects an expression as first argument"
-      elsif (expr.arguments[0].as LExpression).arguments.size < 1
-        raise "defun expects an expression as first argument with at least a valid function name"
       end
       callTemplate = expr.arguments[0].as LExpression
       body = expr.arguments[1..]

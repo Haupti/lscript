@@ -7,15 +7,17 @@ module PreParser
   QUOTE_MARK = "quote"
 
   def parseWords(str : String) : Array(String)
-    inString = false
 
     words = [] of String
     word = ""
 
-
+    inString = false
     inComment = false
     str.chars.each do |c|
-      if c == '"'
+      if inComment && inString
+        raise "BUG: cannot be in comment and in string at the same time"
+      end
+      if c == '"' && !inComment
         inString = !inString
       end
 
