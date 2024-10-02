@@ -4,7 +4,8 @@ FALSE = "'#f"
 record FunctionDefinition,
   name : LRef,
   arguments : Array(LRef),
-  body : Array(LData)
+  body : Array(LData),
+  enclosed : EvaluationContext
 
 record DefunRef,
   name : String

@@ -12,12 +12,18 @@ class EvaluationContext
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
-    @functions[ref.name] = FunctionDefinition.new(ref, arguments, body)
+    #
+    # on captured scope:
+    # self is passed in to the function.
+    # this is because the scope its defined in is
+    # the scope it encloses when passed somewhere else.
+    #
+    @functions[ref.name] = FunctionDefinition.new(ref, arguments, body, self)
   end
 
   def evaluateFunction(ref : LRef | DefunRef, arguments : Array(RuntimeValue)) : RuntimeValue
     if @functions[ref.name]? != nil
-      return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments, self)
+      return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
       return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
     else
@@ -72,13 +78,14 @@ class FunctionScope < EvaluationContext
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
-    @functions[ref.name] = FunctionDefinition.new(ref, arguments, body)
+    @functions[ref.name] = FunctionDefinition.new(ref, arguments, body, self)
   end
 
   def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
     if @functions[ref.name]? != nil
-      return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments, self)
+      return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
     elsif @parent.hasFunction(ref)
+      puts "function parent used (eval fn)"
       return @parent.evaluateFunction(ref, arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
       return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
@@ -94,6 +101,7 @@ class FunctionScope < EvaluationContext
   def getVariableValue(ref : LRef) : RuntimeValue
     val = @variables[ref.name]?
     if val.nil?
+      puts "function parent used (get var)"
       return @parent.getVariableValue(ref)
     else
       return val
@@ -131,6 +139,7 @@ class FunctionScope < EvaluationContext
     elsif hasArgument(ref)
       return getArgumentValue(ref)
     elsif @parent.hasConstant(ref)
+      puts "function parent used (get const)"
       return @parent.getConstantValue(ref)
     else
       raise "#{ref.name} not in scope"

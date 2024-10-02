@@ -1,7 +1,7 @@
 module FunctionEvaluator
   extend self
 
-  def evaluateFunction(fn : FunctionDefinition, args : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+  def evaluateFunction(fn : FunctionDefinition, args : Array(RuntimeValue)) : RuntimeValue
     if fn.arguments.size != args.size
       raise "#{fn.name.name} expects #{fn.arguments.size} arguments, but got #{args.size}"
     end
@@ -11,7 +11,7 @@ module FunctionEvaluator
       argsMap[fnarg.name] = args[index]
     end
 
-    scope : FunctionScope = FunctionScope.new(argsMap, context)
+    scope : FunctionScope = FunctionScope.new(argsMap, fn.enclosed)
     result : RuntimeValue = NilValue.new
     fn.body.each do |datum|
       result = Interpreter.evaluate(datum, scope)
