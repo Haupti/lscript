@@ -52,6 +52,6 @@
 )
 
 (out "got here")
-(def inside-out (outer))
+(defun (inside-out) (outer))
 (out "got here too")
-(inside-out "123")
+(debug ((inside-out)))

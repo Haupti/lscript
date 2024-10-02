@@ -16,7 +16,7 @@ class EvaluationContext
   end
 
   def evaluateFunction(ref : LRef | DefunRef, arguments : Array(RuntimeValue)) : RuntimeValue
-    if hasFunction(ref)
+    if @functions[ref.name]? != nil
       return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments, self)
     elsif BuildIn::INSTANCE.hasFunction(ref)
       return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
@@ -76,7 +76,7 @@ class FunctionScope < EvaluationContext
   end
 
   def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
-    if hasFunction(ref)
+    if @functions[ref.name]? != nil
       return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments, self)
     elsif @parent.hasFunction(ref)
       return @parent.evaluateFunction(ref, arguments)

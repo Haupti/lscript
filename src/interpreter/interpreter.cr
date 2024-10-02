@@ -180,7 +180,7 @@ module Interpreter
       elsif context.hasFunction expr.first
         return context.evaluateFunction(expr.first, evaluateList(expr.arguments,context))
       else
-        raise "not in scope #{expr.first.name}"
+        raise "no function '#{expr.first.name}' in scope"
       end
     end
   end
