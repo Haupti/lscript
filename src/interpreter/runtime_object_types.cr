@@ -1,14 +1,27 @@
 TRUE = "'#t"
 FALSE = "'#f"
 
-record FunctionDefinition,
-  name : LRef,
-  arguments : Array(LRef),
-  body : Array(LData),
-  enclosed : EvaluationContext
+class FunctionObject
+  @name : LRef
+  @arguments : Array(LRef)
+  @body : Array(LData)
+  @enclosed : EvaluationContext
+  def initialize(@name : LRef, @arguments : Array(LRef), @body : Array(LData), @enclosed : EvaluationContext)
+  end
 
-record DefunRef,
-  name : String
+  def name()
+    return @name
+  end
+  def arguments()
+    return @arguments
+  end
+  def body()
+    return @body
+  end
+  def enclosed()
+    return @enclosed
+  end
+end
 
 record NumberValue,
   value : Int64 | Int32 | Float64 | Float32
@@ -27,10 +40,6 @@ end
 
 record NilValue
 
-# TODO add an error value type which will be returned on all failed operations instead of an error
-# program should only 'panic' if an error is received as argument to any function except:
-# error related functions, these obviously dont panic if they receive an error
-
 record ListObject,
   elems : Array(RuntimeValue)
 
@@ -38,12 +47,12 @@ record ErrorValue,
   reason : String
 
 
-alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | DefunRef | NilValue | ErrorValue
+alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | FunctionObject | NilValue | ErrorValue
 
 def rtvToStr(rtv : RuntimeValue) : String
   case rtv
-  when DefunRef
-    return "#{rtv.name}"
+  when FunctionObject
+    return "function"
   when SymbolValue
     return "#{rtv.name}"
   when StringValue

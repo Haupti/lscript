@@ -46,13 +46,18 @@ module LParser
         when LSymbol
           raise "expected a identifier as first argument of an expression, but got symbol"
         when LRef
-          return LExpression.new(firstLeaf, parseMany(node.children[1..-1]))
+          return LExpression.new(firstLeaf, parseMany(node.children[1..]))
         else
           raise "BUG: expected Leaf type here but got '#{firstLeaf}'"
         end
       end
     when Node
-      raise "BUG: expected Leaf here but got node '#{first}'"
+      parsedFirst = parseNode(first)
+      if parsedFirst.is_a? LExpression
+        return LExpression.new(parsedFirst, parseMany(node.children[1..]))
+      else
+        raise "expected a expression or identifier as first argument of an expression"
+      end
     else
       raise "BUG: expected tree type here but got '#{first}'"
     end

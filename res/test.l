@@ -47,11 +47,11 @@
 (defun (outer)
     (let z 3)
     (defun (inner a)
-        (out (+ a z))
+        (+ a z)
     )
     inner
 )
 
 (defun (inside-out) (outer))
 (out "hwa")
-(debug (inside-out))
+(debug ((inside-out) 2))

@@ -48,7 +48,7 @@ module Interpreter
       elsif context.hasVariable datum
         return context.getVariableValue datum
       elsif context.hasFunction datum
-        return DefunRef.new datum.name
+        return context.getFunction datum
       else
         raise "#{datum.name} not in scope"
       end
@@ -72,7 +72,7 @@ module Interpreter
         elsif context.hasConstant datum
           context.getConstantValue(datum)
         elsif context.hasFunction datum
-          DefunRef.new datum.name
+          context.getFunction datum
         else
           raise "unexpected no case matched while evaluating list (#{datum})"
         end
@@ -94,74 +94,94 @@ module Interpreter
   end
 
   def evaluateExpression(expr : LExpression, context : EvaluationContext) : RuntimeValue
-    refName = expr.first.name
+    first = expr.first
+    case first
+    when LRef
+      return evaluateDirectExpression(first, expr.arguments, context)
+    when LExpression
+      firstResult = evaluateExpression(first, context)
+      if firstResult.is_a? FunctionObject
+        return FunctionEvaluator.evaluateFunction(firstResult, evaluateList(expr.arguments, context))
+      else
+        raise "expected a function name but got '#{rtvToStr(firstResult)}'"
+      end
+    else
+      raise "BUG: should not happen"
+    end
+  end
+
+  def evaluateDirectExpression(first : LRef, arguments : Array(LData), context : EvaluationContext) : RuntimeValue
+    refName = first.name
     case refName
     when "defun"
-      if expr.arguments.size < 2
+      if arguments.size < 2
         raise "defun expects at least two arguments"
-      elsif !expr.arguments[0].is_a? LExpression
+      elsif !arguments[0].is_a? LExpression
         raise "defun expects an expression as first argument"
       end
-      callTemplate = expr.arguments[0].as LExpression
-      body = expr.arguments[1..]
-      if context.hasFunction callTemplate.first
-        raise "#{callTemplate.first.name} already in scope"
+      callTemplate = arguments[0].as LExpression
+      body = arguments[1..]
+      callTemplateFirst = callTemplate.first
+      if !callTemplateFirst.is_a? LRef
+        raise "expected a valid identifier"
+      elsif context.hasFunction callTemplateFirst
+        raise "#{callTemplateFirst.name} already in scope"
       else
-        arguments : Array(LRef) = callTemplate.arguments.map do |arg|
+        callarguments : Array(LRef) = callTemplate.arguments.map do |arg|
           if !(arg.is_a? LRef)
             raise "defun function call template expects only valid argument names"
           end
           arg
         end
-        context.setFunction(callTemplate.first, arguments, body)
+        context.setFunction(callTemplateFirst, callarguments, body)
       end
       return NilValue.new
     when "def"
-      if expr.arguments.size < 2 || expr.arguments.size > 2
+      if arguments.size < 2 || arguments.size > 2
         raise "def expects exactly two arguments"
-      elsif !expr.arguments[0].is_a? LRef
+      elsif !arguments[0].is_a? LRef
         raise "def expects a identifier as first argument"
       else
-        ref = expr.arguments[0].as(LRef)
+        ref = arguments[0].as(LRef)
         if context.hasConstant ref
           raise "constant #{ref.name} already defined"
         end
-        context.setConstant(ref, evaluate(expr.arguments[1], context))
+        context.setConstant(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
     when "set"
-      if expr.arguments.size < 2 || expr.arguments.size > 2
+      if arguments.size < 2 || arguments.size > 2
         raise "set expects exactly two arguments"
-      elsif !expr.arguments[0].is_a? LRef
+      elsif !arguments[0].is_a? LRef
         raise "set expects a identifier as first argument"
       else
-        ref = expr.arguments[0].as(LRef)
+        ref = arguments[0].as(LRef)
         if !context.hasVariable ref
           raise "variable #{ref.name} not defined"
         end
-        context.setVariable(ref, evaluate(expr.arguments[1], context))
+        context.setVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
     when "let"
-      if expr.arguments.size != 2
+      if arguments.size != 2
         raise "let expects exactly two arguments"
-      elsif !expr.arguments[0].is_a? LRef
+      elsif !arguments[0].is_a? LRef
         raise "let expects a identifier as first argument"
       else
-        ref = expr.arguments[0].as(LRef)
+        ref = arguments[0].as(LRef)
         if context.hasVariable ref
           raise "variable #{ref.name} already defined"
         end
-        context.setVariable(ref, evaluate(expr.arguments[1], context))
+        context.setVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
     when "if"
-      if expr.arguments.size != 3
+      if arguments.size != 3
         raise "'if' expects exactly three arguments"
       end
-      cond = evaluate(expr.arguments[0], context)
-      trueVal = expr.arguments[1]
-      falseVal = expr.arguments[2]
+      cond = evaluate(arguments[0], context)
+      trueVal = arguments[1]
+      falseVal = arguments[2]
       if cond.is_a? SymbolValue
         if cond.name == TRUE
         return evaluate(trueVal, context)
@@ -175,13 +195,17 @@ module Interpreter
       end
 
     else
-      if BuildIn::INSTANCE.hasFunction expr.first
-        return BuildIn::INSTANCE.evaluateFunction(expr.first, evaluateList(expr.arguments, context), context)
-      elsif context.hasFunction expr.first
-        return context.evaluateFunction(expr.first, evaluateList(expr.arguments,context))
-      else
-        raise "no function '#{expr.first.name}' in scope"
-      end
+      return evaluateNonKeywordExpression(first, arguments, context)
+    end
+  end
+
+  def evaluateNonKeywordExpression(first : LRef, arguments : Array(LData), context : EvaluationContext) : RuntimeValue
+    if BuildIn::INSTANCE.hasFunction first
+      return BuildIn::INSTANCE.evaluateFunction(first, evaluateList(arguments, context), context)
+    elsif context.hasFunction first
+      return context.evaluateFunction(first, evaluateList(arguments,context))
+    else
+      raise "no function '#{first.name}' in scope"
     end
   end
 end

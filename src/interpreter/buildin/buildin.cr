@@ -20,18 +20,18 @@ module BuildIn
     @fns = [
       "+", "-", "*", "/", "mod", "lt?", "lte?", "gt?", "gte?", # number stuff
       "and", "or", "not", # bool stuff
-      "debug", "to-str", "typeof", "err", "err?", "err-reason", # weird stuff
+      "debug", "to-str", "typeof", "err", "err?", "err-reason", "panic", # weird stuff
       "out", "get-input", # io stuff
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
     ];
 
-    def hasFunction(ref : LRef | DefunRef) : Bool
+    def hasFunction(ref : LRef) : Bool
       return @fns.includes? ref.name
     end
 
-    def evaluateFunction(ref : LRef | DefunRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+    def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
       found = @fns.includes? ref.name
       if !found
         raise "#{ref.name} not in scope"
@@ -111,6 +111,8 @@ module BuildIn
           return evaluateIsError(arguments)
         when "err-reason"
           return evaluateErrorReason(arguments)
+        when "panic"
+          return evaluateErrorPanic(arguments)
         else
           raise "#{ref.name} not in scope"
         end
@@ -138,8 +140,8 @@ module BuildIn
         return StringValue.new "symbol"
       when ListObject
         return StringValue.new "list"
-      when DefunRef
-        return StringValue.new "function-reference"
+      when FunctionObject
+        return StringValue.new "function"
       when NilValue
         return StringValue.new "nil"
       else
@@ -207,6 +209,20 @@ module BuildIn
         raise "'err-reason' expects an error value as argument"
       end
       return StringValue.new fst.reason
+    end
+
+    def evaluateErrorPanic(arguments : Array(RuntimeValue))
+      if arguments.size != 1
+        raise "'panic' expects one arguments"
+      end
+      error = arguments[0]
+      if error.is_a? ErrorValue
+        puts "panic: #{error.reason}"
+        exit 1
+      else
+        raise "'panic' expects an error value"
+      end
+
     end
 
   end

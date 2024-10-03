@@ -76,20 +76,16 @@ module ListBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if !fst.is_a? DefunRef
+    if !fst.is_a? FunctionObject
       raise "'map' expects a function as first argument"
     end
     if !snd.is_a? ListObject
       raise "'map' expects a list as second argument"
     end
 
-    if !context.hasFunction(fst)
-      raise "'#{fst.name}' is not in scope"
-    end
-
     results = [] of RuntimeValue
     snd.elems.each do |elem|
-      results << context.evaluateFunction(fst, [elem])
+      results << FunctionEvaluator.evaluateFunction(fst, [elem])
     end
     return ListObject.new results
   end
@@ -100,20 +96,16 @@ module ListBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if !fst.is_a? DefunRef
+    if !fst.is_a? FunctionObject
       raise "'filter' expects a function as first argument"
     end
     if !snd.is_a? ListObject
       raise "'filter' expects a list as second argument"
     end
 
-    if !context.hasFunction(fst)
-      raise "'#{fst.name}' is not in scope"
-    end
-
     results = [] of RuntimeValue
     snd.elems.each do |elem|
-      predicateResult = context.evaluateFunction(fst, [elem])
+      predicateResult = FunctionEvaluator.evaluateFunction(fst, [elem])
       if !predicateResult.is_a? SymbolValue
         raise "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol"
       elsif predicateResult.name == TRUE

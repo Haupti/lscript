@@ -8,7 +8,18 @@ record LNumber, value : LNumberType
 
 alias LAtom = LNumber | LString | LSymbol | LRef
 
-record LExpression, first : LRef, arguments : Array(LData)
+class LExpression
+   @first : LRef | LExpression
+   @arguments : Array(LData)
+   def initialize(@first : LRef | LExpression, @arguments : Array(LData))
+   end
+   def first()
+     return @first
+   end
+   def arguments()
+     return @arguments
+   end
+end
 
 record LList, elems : Array(LData)
 

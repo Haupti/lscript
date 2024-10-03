@@ -3,11 +3,11 @@ require "./function_evaluator.cr"
 
 class EvaluationContext
   @constants : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
-  @functions : Hash(String, FunctionDefinition) = Hash(String, FunctionDefinition).new
+  @functions : Hash(String, FunctionObject) = Hash(String, FunctionObject).new
   @variables : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
 
 
-  def hasFunction(ref : LRef | DefunRef) : Bool
+  def hasFunction(ref : LRef) : Bool
     return @functions[ref.name]? != nil
   end
 
@@ -18,16 +18,25 @@ class EvaluationContext
     # this is because the scope its defined in is
     # the scope it encloses when passed somewhere else.
     #
-    @functions[ref.name] = FunctionDefinition.new(ref, arguments, body, self)
+    @functions[ref.name] = FunctionObject.new(ref, arguments, body, self)
   end
 
-  def evaluateFunction(ref : LRef | DefunRef, arguments : Array(RuntimeValue)) : RuntimeValue
+  def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
     if @functions[ref.name]? != nil
       return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
       return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
     else
       raise "'#{ref.name}' not in scope"
+    end
+  end
+
+  def getFunction(ref : LRef) : FunctionObject
+    fn = @functions[ref.name]?
+    if fn.nil?
+      raise "#'{ref.name}' not in scope"
+    else
+      return fn
     end
   end
 
@@ -78,14 +87,13 @@ class FunctionScope < EvaluationContext
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
-    @functions[ref.name] = FunctionDefinition.new(ref, arguments, body, self)
+    @functions[ref.name] = FunctionObject.new(ref, arguments, body, self)
   end
 
   def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
     if @functions[ref.name]? != nil
       return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
     elsif @parent.hasFunction(ref)
-      puts "function parent used (eval fn)"
       return @parent.evaluateFunction(ref, arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
       return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
@@ -101,7 +109,6 @@ class FunctionScope < EvaluationContext
   def getVariableValue(ref : LRef) : RuntimeValue
     val = @variables[ref.name]?
     if val.nil?
-      puts "function parent used (get var)"
       return @parent.getVariableValue(ref)
     else
       return val
