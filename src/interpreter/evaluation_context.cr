@@ -8,7 +8,7 @@ class EvaluationContext
 
 
   def hasFunction(ref : LRef) : Bool
-    return @functions[ref.name]? != nil
+    return @functions[ref.name]? != nil || BuildIn::INSTANCE.hasFunction(ref)
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
@@ -25,16 +25,20 @@ class EvaluationContext
     if @functions[ref.name]? != nil
       return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
-      return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
+      return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
     else
       raise "'#{ref.name}' not in scope"
     end
   end
 
-  def getFunction(ref : LRef) : FunctionObject
+  def getFunction(ref : LRef) : RuntimeValue
     fn = @functions[ref.name]?
     if fn.nil?
-      raise "#'{ref.name}' not in scope"
+      if BuildIn::INSTANCE.hasFunction(ref)
+        return BuildinFunctionRef.new ref.name
+      else
+        raise "#'{ref.name}' not in scope"
+      end
     else
       return fn
     end
@@ -96,7 +100,7 @@ class FunctionScope < EvaluationContext
     elsif @parent.hasFunction(ref)
       return @parent.evaluateFunction(ref, arguments)
     elsif BuildIn::INSTANCE.hasFunction(ref)
-      return BuildIn::INSTANCE.evaluateFunction(ref, arguments, self)
+      return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
     else
       raise "'#{ref.name}' not in scope"
     end

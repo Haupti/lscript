@@ -29,6 +29,9 @@ record NumberValue,
 record StringValue,
   value : String
 
+record BuildinFunctionRef,
+  name  : String
+
 record SymbolValue, name : String do
   def self.trueValue
     return SymbolValue.new TRUE
@@ -47,11 +50,13 @@ record ErrorValue,
   reason : String
 
 
-alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | FunctionObject | NilValue | ErrorValue
+alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | FunctionObject | BuildinFunctionRef | NilValue | ErrorValue
 
 def rtvToStr(rtv : RuntimeValue) : String
   case rtv
   when FunctionObject
+    return "function"
+  when BuildinFunctionRef
     return "function"
   when SymbolValue
     return "#{rtv.name}"

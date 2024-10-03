@@ -31,7 +31,7 @@ module BuildIn
       return @fns.includes? ref.name
     end
 
-    def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+    def evaluateFunction(ref : LRef | BuildinFunctionRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
       found = @fns.includes? ref.name
       if !found
         raise "#{ref.name} not in scope"

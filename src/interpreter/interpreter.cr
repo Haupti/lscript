@@ -8,17 +8,8 @@ module Interpreter
 
   def run(code : Array(LData)) : RuntimeValue
 
-    # Special makros that are required to make the programming language
-
-    # defun  - defines a function : (defun (name [args]) ...body)
-    # def    - defines a constant : (def name ...value)
-    # let    - defines a variable : (let name ...value)
-    # set    - mutates a variable : (set name ...value)
-    # LATER import - takes a path relative to the current file and imports the module : (import "path" alias)
-    # LATER module/struct access syntax
-
     context = EvaluationContext.new
-    # top level code: only evaluate expressions
+
     result : RuntimeValue = NilValue.new
     code.each do |datum|
       case datum
@@ -102,6 +93,8 @@ module Interpreter
       firstResult = evaluateExpression(first, context)
       if firstResult.is_a? FunctionObject
         return FunctionEvaluator.evaluateFunction(firstResult, evaluateList(expr.arguments, context))
+      elsif firstResult.is_a? BuildinFunctionRef
+        return FunctionEvaluator.evaluateReferencedFunction(firstResult, evaluateList(expr.arguments, context), context)
       else
         raise "expected a function name but got '#{rtvToStr(firstResult)}'"
       end
@@ -201,7 +194,7 @@ module Interpreter
 
   def evaluateNonKeywordExpression(first : LRef, arguments : Array(LData), context : EvaluationContext) : RuntimeValue
     if BuildIn::INSTANCE.hasFunction first
-      return BuildIn::INSTANCE.evaluateFunction(first, evaluateList(arguments, context), context)
+      return FunctionEvaluator.evaluateReferencedFunction(first, evaluateList(arguments, context), context)
     elsif context.hasFunction first
       return context.evaluateFunction(first, evaluateList(arguments,context))
     else

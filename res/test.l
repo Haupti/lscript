@@ -55,3 +55,9 @@
 (defun (inside-out) (outer))
 (out "hwa")
 (debug ((inside-out) 2))
+
+(defun (returnsplus)
+  +
+)
+
+(out ((returnsplus) 2 1))
