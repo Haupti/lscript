@@ -129,6 +129,23 @@ module Interpreter
         context.setFunction(callTemplateFirst, callarguments, body)
       end
       return NilValue.new
+    when "lambda"
+      if arguments.size < 2
+        raise "'lambda' expects at least two arguments"
+      elsif !arguments[0].is_a? LExpression
+        raise "'lambda' expects an expression as first argument"
+      end
+      callTemplate = arguments[0].as LExpression
+      body = arguments[1..]
+      callTemplateFirst = callTemplate.first
+      callTemplateArguments  = [callTemplateFirst] + callTemplate.arguments
+      lambdacallarguments : Array(LRef) = callTemplateArguments.map do |arg|
+        if !(arg.is_a? LRef)
+          raise "'lambda' function call template expects only valid argument names"
+        end
+        arg
+      end
+      return FunctionObject.new(LRef.new("lambda"), lambdacallarguments, body, context)
     when "def"
       if arguments.size < 2 || arguments.size > 2
         raise "def expects exactly two arguments"

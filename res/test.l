@@ -61,3 +61,9 @@
 )
 
 (out ((returnsplus) 2 1))
+
+(defun (return-lambda)
+  (lambda (a b) (+ a b))
+)
+
+(out ((return-lambda) 2 2))
