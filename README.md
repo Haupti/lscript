@@ -23,12 +23,13 @@ you quote the first bracket:
 ## keywords
 currently there are only very few keywords, and i like to keep the list short.
 these are:
-* defun
-* def
-* let 
-* set
-* if
-* ;
+* `(defun (name (...args) ...body))` - defines a function in the current scope
+* `(lambda (...args) ...body)` - creates a function object and returns it
+* `(def name value-expession)` - defines a constant in the current scope
+* `(let name value-expession)` - defines a mutable value in the current scope
+* `(set name value-expession)` - mutates a already defined mutable value
+* `(if condition-expession then-expression else-expression)` - dont have to explain this
+* ; - comment
 
 ### defining stuff
 examples speak more that lots of text:
@@ -121,12 +122,14 @@ these functions expect the true or false symbols
 ## Planned
 
 ### buildin
+TODO:
 * read file & write file
 * program arguments
 * env vars
 * eval which evaluates symbols -> 
 * network: tcp / http / socket ?
 * parse number
+* 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
 
 ### features
 * modules
