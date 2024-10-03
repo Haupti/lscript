@@ -55,6 +55,9 @@ examples speak more that lots of text:
 ; special behaviour here is, that the first conditional expression is not evaluated unless the condition is '#t
 ```
 
+## functions
+i should really understand how my functions work. they work. and they work the way i want to. i'm just not really sure how.
+
 
 ## build-in functions
 these functions are available without importing anything (which at the moment is not possible at all).
