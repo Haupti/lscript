@@ -22,5 +22,7 @@ end
 
 record LList, elems : Array(LData)
 
-alias LData = LAtom | LList | LExpression
+record LNil
+
+alias LData = LAtom | LList | LExpression | LNil
 

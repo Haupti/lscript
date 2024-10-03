@@ -28,7 +28,7 @@ module LParser
 
   def parseNode(node : Node) : LData
     if node.children.size == 0
-      return LList.new([] of LData)
+      return LNil.new
     end
 
     first = node.children[0]

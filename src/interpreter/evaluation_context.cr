@@ -104,7 +104,7 @@ class FunctionScope < EvaluationContext
       fn = @variables[ref.name]?
     end
 
-    return fn.nil? && !@parent.nameFree?(ref)
+    return fn.nil? && @parent.nameFree?(ref)
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
@@ -115,6 +115,9 @@ class FunctionScope < EvaluationContext
     fn = @constants[ref.name]?
     if fn.nil?
       fn = @variables[ref.name]?
+    end
+    if fn.nil?
+      fn = @arguments[ref.name]?
     end
 
     if !fn.nil? && fn.is_a? FunctionObject

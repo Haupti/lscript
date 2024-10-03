@@ -128,13 +128,17 @@ module Interpreter
     when "lambda"
       if arguments.size < 2
         raise "'lambda' expects at least two arguments"
-      elsif !arguments[0].is_a? LExpression
+      elsif arguments[0].is_a? LNil
+        lambdaCallTemplateArguments  = [] of LData
+      elsif arguments[0].is_a? LExpression
+        lambdaCallTemplate = arguments[0].as LExpression
+        lambdaCallTemplateArguments  = [lambdaCallTemplate.first] + lambdaCallTemplate.arguments
+      else
         raise "'lambda' expects an expression as first argument"
       end
-      callTemplate = arguments[0].as LExpression
       body = arguments[1..]
-      callTemplateArguments  = [callTemplate.first] + callTemplate.arguments
-      lambdaCallArguments : Array(LRef) = callTemplateArguments.map do |arg|
+
+      lambdaCallArguments : Array(LRef) = lambdaCallTemplateArguments.map do |arg|
         if !(arg.is_a? LRef)
           raise "'lambda' function call template expects only valid argument names"
         end
@@ -208,7 +212,7 @@ module Interpreter
     if BuildIn::INSTANCE.hasFunction first
       return FunctionEvaluator.evaluateReferencedFunction(first, evaluateList(arguments, context), context)
     else
-      return context.evaluateFunction(first, evaluateList(arguments,context))
+      return context.evaluateFunction(first, evaluateList(arguments, context))
     end
   end
 end

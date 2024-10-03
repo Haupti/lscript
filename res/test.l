@@ -42,23 +42,6 @@
 
 ;(let asdf (get-input))
 ;(out asdf)
-
-
-(defun (outer)
-    (out "what")
-    (let z 3)
-    (def inner (lambda (a)
-        (+ a z)
-      )
-    )
-    inner
-)
-
-(defun (inside-out) (outer))
-;(out "hwa")
-(debug ((inside-out) 2))
-(debug ((inside-out) 3))
-(debug ((inside-out) 3))
 ;
 ;(defun (returnsplus)
 ;  +
@@ -74,3 +57,34 @@
 ;)
 ;
 ;(out ((return-lambda) 2 2))
+
+
+;(defun (outer)
+;    (out "what")
+;    (let z 3)
+;    (def inner (lambda (a)
+;        (+ a z)
+;      )
+;    )
+;    inner
+;)
+
+;(debug ((outer) 88))
+;(debug ((outer) 111111))
+
+(defun (call-twice db)
+  (db)
+  (db)
+)
+
+(defun (with-counter)
+  (let z 0)
+  (def callback (lambda ()
+    (set z (+ z 1))
+  ))
+  (callback)
+  (call-twice callback)
+  (out z)
+)
+
+(with-counter)
