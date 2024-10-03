@@ -81,10 +81,12 @@
   (let z 0)
   (def callback (lambda ()
     (set z (+ z 1))
+    (out z)
   ))
   (callback)
   (call-twice callback)
-  (out z)
+  callback
 )
 
-(with-counter)
+((with-counter))
+

@@ -173,15 +173,15 @@ module Interpreter
       end
     when "let"
       if arguments.size != 2
-        raise "let expects exactly two arguments"
+        raise "'let' expects exactly two arguments"
       elsif !arguments[0].is_a? LRef
-        raise "let expects a identifier as first argument"
+        raise "'let' expects a identifier as first argument"
       else
         ref = arguments[0].as(LRef)
         if !context.nameFree? ref
           raise "'#{ref.name}' already defined"
         end
-        context.setVariable(ref, evaluate(arguments[1], context))
+        context.setNewVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
     when "if"

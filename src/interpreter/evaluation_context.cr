@@ -70,7 +70,19 @@ class EvaluationContext
   end
 
   def setVariable(ref : LRef, value : RuntimeValue)
-    @variables[ref.name] = value
+    if @variables[ref.name]? != nil
+      @variables[ref.name] = value
+    else
+      raise "'#{ref.name}' not in scope"
+    end
+  end
+
+  def setNewVariable(ref : LRef, value : RuntimeValue)
+    if @variables[ref.name]? != nil
+      raise "'#{ref.name}' already defined"
+    else
+      @variables[ref.name] = value
+    end
   end
 
   def hasConstant(ref : LRef) : Bool
@@ -141,7 +153,19 @@ class FunctionScope < EvaluationContext
   end
 
   def setVariable(ref : LRef, value : RuntimeValue)
-    @variables[ref.name] = value
+    if @variables[ref.name]? != nil
+      @variables[ref.name] = value
+    else
+     @parent.setVariable(ref, value)
+    end
+  end
+
+  def setNewVariable(ref : LRef, value : RuntimeValue)
+    if @variables[ref.name]? != nil
+      raise "'#{ref.name}' already defined"
+    else
+      @variables[ref.name] = value
+    end
   end
 
   def hasArgument(ref : LRef) : Bool
