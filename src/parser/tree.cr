@@ -1,3 +1,5 @@
+alias Tree = Leaf | Node
+
 struct Leaf
   property leaf : String
 
