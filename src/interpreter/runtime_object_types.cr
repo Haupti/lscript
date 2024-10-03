@@ -6,6 +6,7 @@ class FunctionObject
   @arguments : Array(LRef)
   @body : Array(LData)
   @enclosed : EvaluationContext
+  @hasBeenEvaluated : Bool = false
   def initialize(@name : LRef, @arguments : Array(LRef), @body : Array(LData), @enclosed : EvaluationContext)
   end
 
@@ -20,6 +21,13 @@ class FunctionObject
   end
   def enclosed()
     return @enclosed
+  end
+  def hasBeenEvaluated()
+    return @hasBeenEvaluated
+  end
+  def flagAsEvaluated()
+    puts "flagged"
+    @hasBeenEvaluated = true
   end
 end
 

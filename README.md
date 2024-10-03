@@ -86,6 +86,7 @@ these functions expect the true or false symbols
 * `(err string) -> error`
 * `(err? *) -> symbol`
 * `(err-reason error) -> string`
+* `(panic error) -> nil`
 
 ### io
 * `(out *) -> nil`
@@ -127,7 +128,6 @@ these functions expect the true or false symbols
 ### features
 * modules
 * table / hashmap / dictionary / object or something like this
-* lambdas
 * parser remembers row and column of stuff so panics are more helpful
 * type verification
 * macros (either the c-like ones or better, but this is really for the future)

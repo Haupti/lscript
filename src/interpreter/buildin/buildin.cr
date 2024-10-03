@@ -9,12 +9,6 @@ require "./symbol_buildin.cr"
 module BuildIn
   extend self
 
-  # TODO build-in functions to implement
-  # read file / write file
-  # program arguments
-  # sockets: tcp / http ?
-  # parse number
-
   class BuildIn
 
     @fns = [
@@ -27,7 +21,7 @@ module BuildIn
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
     ];
 
-    def hasFunction(ref : LRef) : Bool
+    def hasFunction(ref : LRef | BuildinFunctionRef) : Bool
       return @fns.includes? ref.name
     end
 
@@ -161,7 +155,7 @@ module BuildIn
 
     def evaluateEquals(arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size < 2
-        raise "'=' expects at least two arguments"
+        raise "'eq?' expects at least two arguments"
       end
       result = true
       first = arguments[0]

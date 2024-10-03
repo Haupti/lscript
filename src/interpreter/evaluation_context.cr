@@ -7,8 +7,13 @@ class EvaluationContext
   @variables : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
 
 
-  def hasFunction(ref : LRef) : Bool
-    return @functions[ref.name]? != nil || BuildIn::INSTANCE.hasFunction(ref)
+  def nameFree?(ref : LRef) : Bool
+    fn = @constants[ref.name]?
+    if fn.nil?
+      fn = @variables[ref.name]?
+    end
+
+    return fn.nil? && !BuildIn::INSTANCE.hasFunction(ref)
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
@@ -18,29 +23,36 @@ class EvaluationContext
     # this is because the scope its defined in is
     # the scope it encloses when passed somewhere else.
     #
-    @functions[ref.name] = FunctionObject.new(ref, arguments, body, self)
+    @constants[ref.name] = FunctionObject.new(ref, arguments, body, self)
   end
 
   def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
-    if @functions[ref.name]? != nil
-      return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
-    elsif BuildIn::INSTANCE.hasFunction(ref)
-      return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
+    fn = @constants[ref.name]?
+    if fn.nil?
+      fn = @variables[ref.name]?
+    end
+
+    if !fn.nil? && fn.is_a? FunctionObject
+      return FunctionEvaluator.evaluateFunction(fn, arguments)
     else
-      raise "'#{ref.name}' not in scope"
+      return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
     end
   end
 
   def getFunction(ref : LRef) : RuntimeValue
-    fn = @functions[ref.name]?
+    fn = @constants[ref.name]?
     if fn.nil?
+      fn = @variables[ref.name]?
+    end
+
+    unless fn.nil?
+      return fn
+    else
       if BuildIn::INSTANCE.hasFunction(ref)
         return BuildinFunctionRef.new ref.name
       else
         raise "#'{ref.name}' not in scope"
       end
-    else
-      return fn
     end
   end
 
@@ -86,23 +98,29 @@ class FunctionScope < EvaluationContext
   def initialize(@arguments : Hash(String, RuntimeValue), @parent : EvaluationContext)
   end
 
-  def hasFunction(ref : LRef) : Bool
-    return @functions[ref.name]? != nil || @parent.hasFunction(ref)
+  def nameFree?(ref : LRef) : Bool
+    fn = @constants[ref.name]?
+    if fn.nil?
+      fn = @variables[ref.name]?
+    end
+
+    return fn.nil? && !@parent.nameFree?(ref)
   end
 
   def setFunction(ref : LRef, arguments : Array(LRef), body : Array(LData))
-    @functions[ref.name] = FunctionObject.new(ref, arguments, body, self)
+    @constants[ref.name] = FunctionObject.new(ref, arguments, body, self)
   end
 
   def evaluateFunction(ref : LRef, arguments : Array(RuntimeValue)) : RuntimeValue
-    if @functions[ref.name]? != nil
-      return FunctionEvaluator.evaluateFunction(@functions[ref.name], arguments)
-    elsif @parent.hasFunction(ref)
-      return @parent.evaluateFunction(ref, arguments)
-    elsif BuildIn::INSTANCE.hasFunction(ref)
-      return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
+    fn = @constants[ref.name]?
+    if fn.nil?
+      fn = @variables[ref.name]?
+    end
+
+    if !fn.nil? && fn.is_a? FunctionObject
+      return FunctionEvaluator.evaluateFunction(fn, arguments)
     else
-      raise "'#{ref.name}' not in scope"
+      return @parent.evaluateFunction(ref, arguments)
     end
   end
 

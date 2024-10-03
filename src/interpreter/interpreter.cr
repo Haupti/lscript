@@ -38,8 +38,6 @@ module Interpreter
         return context.getConstantValue datum
       elsif context.hasVariable datum
         return context.getVariableValue datum
-      elsif context.hasFunction datum
-        return context.getFunction datum
       else
         raise "#{datum.name} not in scope"
       end
@@ -62,8 +60,6 @@ module Interpreter
           context.getVariableValue datum
         elsif context.hasConstant datum
           context.getConstantValue(datum)
-        elsif context.hasFunction datum
-          context.getFunction datum
         else
           raise "unexpected no case matched while evaluating list (#{datum})"
         end
@@ -117,7 +113,7 @@ module Interpreter
       callTemplateFirst = callTemplate.first
       if !callTemplateFirst.is_a? LRef
         raise "expected a valid identifier"
-      elsif context.hasFunction callTemplateFirst
+      elsif !context.nameFree? callTemplateFirst
         raise "#{callTemplateFirst.name} already in scope"
       else
         callarguments : Array(LRef) = callTemplate.arguments.map do |arg|
@@ -137,15 +133,14 @@ module Interpreter
       end
       callTemplate = arguments[0].as LExpression
       body = arguments[1..]
-      callTemplateFirst = callTemplate.first
-      callTemplateArguments  = [callTemplateFirst] + callTemplate.arguments
-      lambdacallarguments : Array(LRef) = callTemplateArguments.map do |arg|
+      callTemplateArguments  = [callTemplate.first] + callTemplate.arguments
+      lambdaCallArguments : Array(LRef) = callTemplateArguments.map do |arg|
         if !(arg.is_a? LRef)
           raise "'lambda' function call template expects only valid argument names"
         end
         arg
       end
-      return FunctionObject.new(LRef.new("lambda"), lambdacallarguments, body, context)
+      return FunctionObject.new(LRef.new("lambda"), lambdaCallArguments, body, context)
     when "def"
       if arguments.size < 2 || arguments.size > 2
         raise "def expects exactly two arguments"
@@ -153,8 +148,8 @@ module Interpreter
         raise "def expects a identifier as first argument"
       else
         ref = arguments[0].as(LRef)
-        if context.hasConstant ref
-          raise "constant #{ref.name} already defined"
+        if !context.nameFree? ref
+          raise "'#{ref.name}' already defined"
         end
         context.setConstant(ref, evaluate(arguments[1], context))
         return NilValue.new
@@ -179,8 +174,8 @@ module Interpreter
         raise "let expects a identifier as first argument"
       else
         ref = arguments[0].as(LRef)
-        if context.hasVariable ref
-          raise "variable #{ref.name} already defined"
+        if !context.nameFree? ref
+          raise "'#{ref.name}' already defined"
         end
         context.setVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
@@ -212,10 +207,8 @@ module Interpreter
   def evaluateNonKeywordExpression(first : LRef, arguments : Array(LData), context : EvaluationContext) : RuntimeValue
     if BuildIn::INSTANCE.hasFunction first
       return FunctionEvaluator.evaluateReferencedFunction(first, evaluateList(arguments, context), context)
-    elsif context.hasFunction first
-      return context.evaluateFunction(first, evaluateList(arguments,context))
     else
-      raise "no function '#{first.name}' in scope"
+      return context.evaluateFunction(first, evaluateList(arguments,context))
     end
   end
 end

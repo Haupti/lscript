@@ -20,6 +20,10 @@ module FunctionEvaluator
   end
 
   def evaluateReferencedFunction(fn : LRef | BuildinFunctionRef, args : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
-    return BuildIn::INSTANCE.evaluateFunction(fn, args, context)
+    if BuildIn::INSTANCE.hasFunction(fn)
+      return BuildIn::INSTANCE.evaluateFunction(fn, args, context)
+    else
+      raise "'#{fn.name}' not in scope"
+    end
   end
 end
