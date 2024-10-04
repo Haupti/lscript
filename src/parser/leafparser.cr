@@ -10,10 +10,10 @@ module LeafParser
           else
             return LNumber.new floatparsed
           end
-        elsif
+        else
           intparsed = leaf.leaf.to_i?
           if intparsed.nil?
-            raise "not a valid int number"
+            raise "not a valid number"
           else
             return LNumber.new intparsed
           end

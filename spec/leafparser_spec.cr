@@ -17,4 +17,13 @@ describe LeafParser do
   it "parses ref" do
     LeafParser.parseLeaf(Leaf.new("hi")).should eq(LRef.new "hi")
   end
+  expect_raises(Exception, /^'\"' is not allowed in symbols$/) do
+    LeafParser.parseLeaf(Leaf.new("'h\"i"))
+  end
+  expect_raises(Exception, /^not a valid float number$/) do
+    LeafParser.parseLeaf(Leaf.new("1.1.1"))
+  end
+  expect_raises(Exception, /^not a valid number$/) do
+    LeafParser.parseLeaf(Leaf.new("1,1"))
+  end
 end
