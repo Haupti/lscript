@@ -27,10 +27,10 @@ describe PreParser do
     ])
   end
   it "ignores comments" do
-    result = PreParser.doParse("(hi ;1 1.1; \"lol\" 'test)\n; hallo")
+    result = PreParser.doParse("(hi ;1 1.1; \"lol;\" 'test)\n; hallo \"y\"")
     result.should eq([
       Node.new([Leaf.new("hi"),
-                Leaf.new("\"lol\""),
+                Leaf.new("\"lol;\""),
                 Leaf.new("'test"),
     ] of Tree)
     ])
