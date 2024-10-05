@@ -38,6 +38,8 @@ module Interpreter
         return context.getConstantValue datum
       elsif context.hasVariable datum
         return context.getVariableValue datum
+      elsif BuildIn::INSTANCE.hasFunction datum
+        return BuildinFunctionRef.new datum.name
       else
         raise "#{datum.name} not in scope"
       end
@@ -89,6 +91,8 @@ module Interpreter
       firstResult = evaluateExpression(first, context)
       if firstResult.is_a? FunctionObject
         return FunctionEvaluator.evaluateFunction(firstResult, evaluateList(expr.arguments, context))
+      elsif firstResult.is_a? TableObject
+        return FunctionEvaluator.evaluateTableFunction(firstResult, evaluateList(expr.arguments, context))
       elsif firstResult.is_a? BuildinFunctionRef
         return FunctionEvaluator.evaluateReferencedFunction(firstResult, evaluateList(expr.arguments, context), context)
       else
@@ -184,6 +188,21 @@ module Interpreter
         context.setNewVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
+    when "table"
+      data = Hash(StringValue | NumberValue | SymbolValue, RuntimeValue).new
+      arguments.each do |arg|
+        if !arg.is_a? LExpression
+          raise "'table' expects key-value pairs as arguments"
+        end
+        fst = arg.first
+        if !fst.is_a? NumberValue && !fst.is_a? StringValue && !fst.is_a? SymbolValue
+          raise "'table' keys can only be number, string and symbol"
+        elsif fst.arguments.size != 1
+          raise "'table' expects key-value pairs as arguments"
+        end
+        data[fst] = arg.arguments[0]
+      end
+      return TableObject.new data
     when "if"
       if arguments.size != 3
         raise "'if' expects exactly three arguments"

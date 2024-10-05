@@ -31,6 +31,9 @@ class FunctionObject
   end
 end
 
+record TableObject,
+  data : Hash(StringValue | NumberValue | SymbolValue, RuntimeValue)
+
 record NumberValue,
   value : Int64 | Int32 | Float64 | Float32
 
@@ -58,7 +61,7 @@ record ErrorValue,
   reason : String
 
 
-alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | FunctionObject | BuildinFunctionRef | NilValue | ErrorValue
+alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | FunctionObject | TableObject | BuildinFunctionRef | NilValue | ErrorValue
 
 def typeName(rtv : RuntimeValue) : String
   case rtv
@@ -72,6 +75,8 @@ def typeName(rtv : RuntimeValue) : String
     return "list"
   when FunctionObject
     return "function"
+  when TableObject
+    return "table"
   when NilValue
     return "nil"
   else
@@ -101,6 +106,18 @@ def rtvToStr(rtv : RuntimeValue) : String
     if rtv.elems.size >= 1
       rtv.elems[1..].each do |elem|
         result += " #{rtvToStr(elem)}"
+      end
+    end
+    result += ")"
+    return result
+  when TableObject
+    result = "(table"
+    if rtv.data.keys.size > 0
+      result += " (#{rtvToStr(rtv.data.keys[0])} #{rtvToStr(rtv.data[rtv.data.keys[0]])})"
+    end
+    if rtv.data.keys.size >= 1
+      rtv.data.keys[1..].each do |key|
+        result += " (#{rtvToStr(key)} #{rtvToStr(rtv.data[key])})"
       end
     end
     result += ")"

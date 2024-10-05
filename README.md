@@ -119,21 +119,38 @@ these functions expect the true or false symbols
 * `(str-length string) -> number`
 * `(char-at string integer) -> string`
 
+## tables
+tables are a versatile data type. they kind of act like maps, structures or dictionaries (depending on which language you know).\
+i'll just give you an example how to use them:
+```
+; defines a table with one key "'hi" with value "user"
+(let mytable (table ('hi "user")))
+
+; access a tables value:
+(mytable 'hi) ; -> "user"
+; or
+((table ('hi "steve")) 'hi) ; -> "steve"
+
+; to create a modified table do this:
+(let mynewtable (table))
+(set mynewtable (mynewtable 'hi "paul"))
+```
+if you give a table one value, it will be interpreted as a access to the data stored at this key.\
+if you give a table two values, this will be interpreted as a set operation at this given key with given data at the second argument.
+
 ## Planned
 
 ### buildin
-TODO:
 * read file & write file
 * program arguments
 * env vars
-* eval which evaluates symbols -> 
+* eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
 * network: tcp / http / socket ?
 * parse number
 * 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
 
 ### features
 * modules
-* table / hashmap / dictionary / object or something like this
 * parser remembers row and column of stuff so panics are more helpful
 * type verification
 * macros (either the c-like ones or better, but this is really for the future)

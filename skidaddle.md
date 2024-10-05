@@ -39,3 +39,20 @@ in these cases the funciton scope would not outlive the lambda function.
 what happens if the function scope ends while the lambda function keeps a reference to the parent scope?
 technically this would prevent the parent scope from beeing garbage collected, since it is still referenced. however, it would be gc'd after the lambda function is gc'd. this is technically exactly what i want. the last question that needs to be answered is: how do
 i keep a reference to a scope preventing its cleanup. can i just pass 'self' and it survives?
+
+## tables
+
+```
+(def mytable (table (1 2) ('hi "steve")))
+```
+creates a table with the keys 1 and 'hi.
+
+```
+(mytable 1)
+```
+retruns the value of the table stored as key 1 or an error if it is not present
+```
+(mytable 1 3)
+```
+sets the value of the table at 1 with value 3, overwriting possibly present value at 1 and returns the table
+

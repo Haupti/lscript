@@ -3,7 +3,6 @@ require "./function_evaluator.cr"
 
 class EvaluationContext
   @constants : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
-  @functions : Hash(String, FunctionObject) = Hash(String, FunctionObject).new
   @variables : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
 
 
@@ -34,6 +33,8 @@ class EvaluationContext
 
     if !fn.nil? && fn.is_a? FunctionObject
       return FunctionEvaluator.evaluateFunction(fn, arguments)
+    elsif !fn.nil? && fn.is_a? TableObject
+      return FunctionEvaluator.evaluateTableFunction(fn, arguments)
     else
       return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
     end
@@ -134,6 +135,8 @@ class FunctionScope < EvaluationContext
 
     if !fn.nil? && fn.is_a? FunctionObject
       return FunctionEvaluator.evaluateFunction(fn, arguments)
+    elsif !fn.nil? && fn.is_a? TableObject
+      return FunctionEvaluator.evaluateTableFunction(fn, arguments)
     else
       return @parent.evaluateFunction(ref, arguments)
     end
