@@ -125,22 +125,7 @@ module BuildIn
         raise "'typeof' expects one arguments"
       end
       arg = arguments[0]
-      case arg
-      when StringValue
-        return StringValue.new "string"
-      when NumberValue
-        return StringValue.new "number"
-      when SymbolValue
-        return StringValue.new "symbol"
-      when ListObject
-        return StringValue.new "list"
-      when FunctionObject
-        return StringValue.new "function"
-      when NilValue
-        return StringValue.new "nil"
-      else
-        raise "unexpected no case matched while evaluating type"
-      end
+      return StringValue.new(typeName(arg))
     end
 
     def evaluateDebug(arguments : Array(RuntimeValue)) : RuntimeValue

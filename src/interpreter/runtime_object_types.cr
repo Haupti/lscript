@@ -60,6 +60,25 @@ record ErrorValue,
 
 alias RuntimeValue = NumberValue | StringValue | SymbolValue | ListObject | FunctionObject | BuildinFunctionRef | NilValue | ErrorValue
 
+def typeName(rtv : RuntimeValue) : String
+  case rtv
+  when StringValue
+    return "string"
+  when NumberValue
+    return "number"
+  when SymbolValue
+    return "symbol"
+  when ListObject
+    return "list"
+  when FunctionObject
+    return "function"
+  when NilValue
+    return "nil"
+  else
+    raise "unexpected no case matched while evaluating type"
+  end
+end
+
 def rtvToStr(rtv : RuntimeValue) : String
   case rtv
   when FunctionObject

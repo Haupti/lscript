@@ -78,7 +78,7 @@ module NumberBuildin
       if arg.is_a? NumberValue
         result += arg.value
       else
-        raise "'+' expects number arguments but got #{arg}"
+        raise "'+' expects number arguments but got #{typeName(arg)}"
       end
     end
     return NumberValue.new result
@@ -119,18 +119,18 @@ module NumberBuildin
 
   def evaluateMinus(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size < 2
-      raise "- expects at least two arguments"
+      raise "'-' expects at least two arguments"
     end
     initial = arguments[0]
     if !(initial.is_a? NumberValue)
-      raise "- expects number arguments but got #{initial}"
+      raise "'-' expects number arguments but got #{typeName(initial)}"
     end
     result = initial.value
     arguments[1..].each do |arg|
       if arg.is_a? NumberValue
         result -= arg.value
       else
-        raise "- expects number arguments but got #{arg}"
+        raise "'-' expects number arguments but got #{typeName(arg)}"
       end
     end
     return NumberValue.new result
@@ -138,12 +138,12 @@ module NumberBuildin
 
   def evaluateModulo(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 2
-      raise "'mod' expects exaclty two arguments"
+      raise "'mod' expects exactly two arguments"
     end
     fst = arguments[0]
     snd = arguments[1]
     if !(fst.is_a? NumberValue  && snd.is_a? NumberValue && snd.value.integer?)
-      raise "'mod' expects two integer arguments but got '#{fst}' and '#{snd}'"
+      raise "'mod' expects two integer arguments but got #{typeName(fst)} and #{typeName(snd)}"
     end
     fstVal = fst.value
     sndVal = snd.value
