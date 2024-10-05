@@ -1,3 +1,5 @@
+require "./interpreter.cr"
+
 module FunctionEvaluator
   extend self
 

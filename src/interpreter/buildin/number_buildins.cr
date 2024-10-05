@@ -71,14 +71,14 @@ module NumberBuildin
 
   def evaluateAdd(arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size < 2
-      raise "+ expects at least two arguments"
+      raise "'+' expects at least two arguments"
     end
     result = 0
     arguments.each do |arg|
       if arg.is_a? NumberValue
         result += arg.value
       else
-        raise "+ expects number arguments but got #{arg}"
+        raise "'+' expects number arguments but got #{arg}"
       end
     end
     return NumberValue.new result
