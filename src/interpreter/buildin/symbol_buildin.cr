@@ -1,7 +1,9 @@
+require "../../error_utils.cr"
+
 module SymbolBuildin
   extend self
 
-  def evaluateAnd(arguments : Array(RuntimeValue)) : RuntimeValue
+  def evaluateAnd(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size < 2
       raise "'and' expects at least two arguments"
     end
@@ -11,7 +13,7 @@ module SymbolBuildin
       elsif arg.is_a? SymbolValue && arg.name == FALSE
         false
       else
-        raise "'and' expects either the symbol #{TRUE} or #{FALSE}"
+        raise Err.msgAt(position, "'and' expects either the symbol #{TRUE} or #{FALSE}")
       end
     end
     if result
@@ -21,9 +23,9 @@ module SymbolBuildin
     end
   end
 
-  def evaluateOr(arguments : Array(RuntimeValue)) : RuntimeValue
+  def evaluateOr(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size < 2
-      raise "'or' expects at least two arguments"
+      raise Err.msgAt(position, "'or' expects at least two arguments")
     end
     result = arguments.any? do |arg|
       if arg.is_a? SymbolValue && arg.name == TRUE
@@ -31,7 +33,7 @@ module SymbolBuildin
       elsif arg.is_a? SymbolValue && arg.name == FALSE
         false
       else
-        raise "'or' expects either the symbol #{TRUE} or #{FALSE}"
+        raise Err.msgAt(position, "'or' expects either the symbol #{TRUE} or #{FALSE}")
       end
     end
     if result
@@ -41,9 +43,9 @@ module SymbolBuildin
     end
   end
 
-  def evaluateNot(arguments : Array(RuntimeValue)) : RuntimeValue
+  def evaluateNot(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size != 1
-      raise "'not' expects one arguments"
+      raise Err.msgAt(position, "'not' expects one arguments")
     end
     arg = arguments[0]
     if arg.is_a? SymbolValue && arg.name == TRUE
@@ -51,7 +53,7 @@ module SymbolBuildin
     elsif arg.is_a? SymbolValue && arg.name == FALSE
       return SymbolValue.trueValue
     else
-      raise "'or' expects either the symbol #{TRUE} or #{FALSE}"
+      raise Err.msgAt(position, "'or' expects either the symbol #{TRUE} or #{FALSE}")
     end
 
   end

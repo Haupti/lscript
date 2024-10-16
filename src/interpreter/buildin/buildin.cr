@@ -25,110 +25,110 @@ module BuildIn
       return @fns.includes? ref.name
     end
 
-    def evaluateFunction(ref : LRef | BuildinFunctionRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+    def evaluateFunction(callPosition : Position, ref : LRef | BuildinFunctionRef, arguments : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
       found = @fns.includes? ref.name
       if !found
-        raise "#{ref.name} not in scope"
+        raise Err.msgAt(callPosition, "#{ref.name} not in scope")
       else
         case ref.name
         when "+"
-          return NumberBuildin.evaluateAdd(arguments)
+          return NumberBuildin.evaluateAdd(callPosition, arguments)
         when "-"
-          return NumberBuildin.evaluateMinus(arguments)
+          return NumberBuildin.evaluateMinus(callPosition, arguments)
         when "*"
-          return NumberBuildin.evaluateMultiply(arguments)
+          return NumberBuildin.evaluateMultiply(callPosition, arguments)
         when "/"
-          return NumberBuildin.evaluateDivide(arguments)
+          return NumberBuildin.evaluateDivide(callPosition, arguments)
         when "gt?"
-          return NumberBuildin.evaluateGT(arguments)
+          return NumberBuildin.evaluateGT(callPosition, arguments)
         when "lt?"
-          return NumberBuildin.evaluateLT(arguments)
+          return NumberBuildin.evaluateLT(callPosition, arguments)
         when "gte?"
-          return NumberBuildin.evaluateGTE(arguments)
+          return NumberBuildin.evaluateGTE(callPosition, arguments)
         when "lte?"
-          return NumberBuildin.evaluateLTE(arguments)
+          return NumberBuildin.evaluateLTE(callPosition, arguments)
         when "mod"
-          return NumberBuildin.evaluateModulo(arguments)
+          return NumberBuildin.evaluateModulo(callPosition, arguments)
         when "and"
-          return SymbolBuildin.evaluateAnd(arguments)
+          return SymbolBuildin.evaluateAnd(callPosition, arguments)
         when "or"
-          return SymbolBuildin.evaluateOr(arguments)
+          return SymbolBuildin.evaluateOr(callPosition, arguments)
         when "not"
-          return SymbolBuildin.evaluateNot(arguments)
+          return SymbolBuildin.evaluateNot(callPosition, arguments)
         when "out"
           return IOBuildin.evaluateOut(arguments)
         when "get-input"
           return IOBuildin.evaluateGetInput(arguments)
         when "contains?"
-          return ListBuildin.evaluateContains(arguments)
+          return ListBuildin.evaluateContains(callPosition, arguments)
         when "sublist"
-          return ListBuildin.evaluateSublist(arguments)
+          return ListBuildin.evaluateSublist(callPosition, arguments)
         when "concat"
-          return ListBuildin.evaluateConcat(arguments)
+          return ListBuildin.evaluateConcat(callPosition, arguments)
         when "map"
-          return ListBuildin.evaluateMap(arguments, context)
+          return ListBuildin.evaluateMap(callPosition, arguments, context)
         when "length"
-          return ListBuildin.evaluateLength(arguments)
+          return ListBuildin.evaluateLength(callPosition, arguments)
         when "head"
-          return ListBuildin.evaluateHead(arguments)
+          return ListBuildin.evaluateHead(callPosition, arguments)
         when "tail"
-          return ListBuildin.evaluateTail(arguments)
+          return ListBuildin.evaluateTail(callPosition, arguments)
         when "filter"
-          return ListBuildin.evaluateFilter(arguments, context)
+          return ListBuildin.evaluateFilter(callPosition, arguments, context)
         when "get"
-          return ListBuildin.evaluateGet(arguments)
+          return ListBuildin.evaluateGet(callPosition, arguments)
         when "str-concat"
-          return StringBuildin.evaluateStrConcat(arguments)
+          return StringBuildin.evaluateStrConcat(callPosition, arguments)
         when "str-replace"
-          return StringBuildin.evaluateStrReplace(arguments)
+          return StringBuildin.evaluateStrReplace(callPosition, arguments)
         when "str-replace-all"
-          return StringBuildin.evaluateStrReplaceAll(arguments)
+          return StringBuildin.evaluateStrReplaceAll(callPosition, arguments)
         when "str-contains?"
-          return StringBuildin.evaluateStrContains(arguments)
+          return StringBuildin.evaluateStrContains(callPosition, arguments)
         when "str-length"
-          return StringBuildin.evaluateStrLength(arguments)
+          return StringBuildin.evaluateStrLength(callPosition, arguments)
         when "substr"
-          return StringBuildin.evaluateSubstr(arguments)
+          return StringBuildin.evaluateSubstr(callPosition, arguments)
         when "char-at"
-          return StringBuildin.evaluateCharAt(arguments)
+          return StringBuildin.evaluateCharAt(callPosition, arguments)
         when "eq?"
-          return evaluateEquals(arguments)
+          return evaluateEquals(callPosition, arguments)
         when "debug"
-          return evaluateDebug(arguments)
+          return evaluateDebug(callPosition, arguments)
         when "to-str"
-          return evaluateToStr(arguments)
+          return evaluateToStr(callPosition, arguments)
         when "typeof"
-          return evaluateType(arguments)
+          return evaluateType(callPosition, arguments)
         when "err"
-          return evaluateError(arguments)
+          return evaluateError(callPosition, arguments)
         when "err?"
-          return evaluateIsError(arguments)
+          return evaluateIsError(callPosition, arguments)
         when "err-reason"
-          return evaluateErrorReason(arguments)
+          return evaluateErrorReason(callPosition, arguments)
         when "panic"
-          return evaluateErrorPanic(arguments)
+          return evaluateErrorPanic(callPosition, arguments)
         else
-          raise "#{ref.name} not in scope"
+          raise Err.msgAt(callPosition, "#{ref.name} not in scope")
         end
       end
     end
 
-    def evaluateToStr(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateToStr(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size != 1
-        raise "'to-str' expects one arguments"
+        raise Err.msgAt(position, "'to-str' expects one arguments")
       end
       return StringValue.new rtvToStr(arguments[0])
     end
 
-    def evaluateType(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateType(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size != 1
-        raise "'typeof' expects one arguments"
+        raise Err.msgAt(position, "'typeof' expects one arguments")
       end
       arg = arguments[0]
       return StringValue.new(typeName(arg))
     end
 
-    def evaluateDebug(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateDebug(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       result = ""
       arguments.each do |arg|
           result += "#{arg}"
@@ -138,9 +138,9 @@ module BuildIn
     end
 
 
-    def evaluateEquals(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateEquals(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size < 2
-        raise "'eq?' expects at least two arguments"
+        raise Err.msgAt(position, "'eq?' expects at least two arguments")
       end
       result = true
       first = arguments[0]
@@ -157,20 +157,20 @@ module BuildIn
       end
     end
 
-    def evaluateError(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateError(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size != 1
-        raise "'err' expects one argument"
+        raise Err.msgAt(position, "'err' expects one argument")
       end
       fst = arguments[0]
       if !fst.is_a? StringValue
-        raise "'err' expects a string argument"
+        raise Err.msgAt(position, "'err' expects a string argument")
       end
       return ErrorValue.new fst.value
     end
 
-    def evaluateIsError(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateIsError(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size != 1
-        raise "'err?' expects one arguments"
+        raise Err.msgAt(position, "'err?' expects one arguments")
       end
       if arguments[0].is_a? ErrorValue
         return SymbolValue.trueValue
@@ -179,27 +179,27 @@ module BuildIn
       end
     end
 
-    def evaluateErrorReason(arguments : Array(RuntimeValue)) : RuntimeValue
+    def evaluateErrorReason(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
       if arguments.size != 1
-        raise "'err-reason' expects one arguments"
+        raise Err.msgAt(position, "'err-reason' expects one arguments")
       end
       fst = arguments[0]
       if !fst.is_a? ErrorValue
-        raise "'err-reason' expects an error value as argument"
+        raise Err.msgAt(position, "'err-reason' expects an error value as argument")
       end
       return StringValue.new fst.reason
     end
 
-    def evaluateErrorPanic(arguments : Array(RuntimeValue))
+    def evaluateErrorPanic(position : Position, arguments : Array(RuntimeValue))
       if arguments.size != 1
-        raise "'panic' expects one arguments"
+        raise Err.msgAt(position, "'panic' expects one arguments")
       end
       error = arguments[0]
       if error.is_a? ErrorValue
         puts "panic: #{error.reason}"
         exit 1
       else
-        raise "'panic' expects an error value"
+        raise Err.msgAt(position, "'panic' expects an error value")
       end
 
     end

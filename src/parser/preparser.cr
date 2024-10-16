@@ -1,6 +1,7 @@
 require "./tree.cr"
 require "./token.cr"
 require "./position.cr"
+require "../error_utils.cr"
 
 module PreParser
   extend self
@@ -20,7 +21,7 @@ module PreParser
       col += 1
 
       if inComment && inString
-        raise "BUG: cannot be in comment and in string at the same time"
+        raise Err.bug("cannot be in comment and in string at the same time")
       end
       if c == '"' && !inComment
         inString = !inString
@@ -65,7 +66,7 @@ module PreParser
         # II
         if (c == ' ' || c == '\n') && word.strip != ""
           if word == "'"
-            raise "standalone quotes are not allowed"
+            raise Err.msgAt(Position.new(row, col), "standalone quotes are not allowed")
           end
           words << Token.new(word, Position.new(row, col - 1))
           word = ""
@@ -147,7 +148,7 @@ module PreParser
       end
     end
     unless brCounter == 0
-      raise Exception.new("expected ')'")
+      raise Err.msgAt(words[-1].position, "expected ')'")
     else
       return nodes
     end

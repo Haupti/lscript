@@ -1,3 +1,4 @@
+require "../error_utils.cr"
 require "./runtime_object_types.cr"
 require "./function_evaluator.cr"
 
@@ -36,7 +37,7 @@ class EvaluationContext
     elsif !fn.nil? && fn.is_a? TableObject
       return FunctionEvaluator.evaluateTableFunction(fn, arguments)
     else
-      return FunctionEvaluator.evaluateReferencedFunction(ref, arguments, self)
+      return FunctionEvaluator.evaluateReferencedFunction(ref.position, ref, arguments, self)
     end
   end
 
@@ -52,7 +53,7 @@ class EvaluationContext
       if BuildIn::INSTANCE.hasFunction(ref)
         return BuildinFunctionRef.new ref.name
       else
-        raise "#'{ref.name}' not in scope"
+        raise Err.msgAt(ref.position, "#'{ref.name}' not in scope")
       end
     end
   end
@@ -64,7 +65,7 @@ class EvaluationContext
   def getVariableValue(ref : LRef) : RuntimeValue
     val = @variables[ref.name]?
     if val.nil?
-      raise "#{ref.name} not in scope"
+      raise Err.msgAt(ref.position, "#{ref.name} not in scope")
     else
       return val
     end
@@ -74,13 +75,13 @@ class EvaluationContext
     if @variables[ref.name]? != nil
       @variables[ref.name] = value
     else
-      raise "'#{ref.name}' not in scope"
+      raise Err.msgAt(ref.position, "'#{ref.name}' not in scope")
     end
   end
 
   def setNewVariable(ref : LRef, value : RuntimeValue)
     if @variables[ref.name]? != nil
-      raise "'#{ref.name}' already defined"
+      raise Err.msgAt(ref.position, "'#{ref.name}' already defined")
     else
       @variables[ref.name] = value
     end
@@ -93,7 +94,7 @@ class EvaluationContext
   def getConstantValue(ref : LRef) : RuntimeValue
     val = @constants[ref.name]?
     if val.nil?
-      raise "#{ref.name} not in scope"
+      raise Err.msgAt(ref.position, "#{ref.name} not in scope")
     else
       return val
     end
@@ -165,7 +166,7 @@ class FunctionScope < EvaluationContext
 
   def setNewVariable(ref : LRef, value : RuntimeValue)
     if @variables[ref.name]? != nil
-      raise "'#{ref.name}' already defined"
+      raise Err.msgAt(ref.position, "'#{ref.name}' already defined")
     else
       @variables[ref.name] = value
     end
@@ -178,7 +179,7 @@ class FunctionScope < EvaluationContext
   def getArgumentValue(ref : LRef) : RuntimeValue
     val = @arguments[ref.name]?
     if val.nil?
-      raise "#{ref.name} not an function argument"
+      raise Err.msgAt(ref.position, "#{ref.name} not an function argument")
     else
       return val
     end
@@ -192,7 +193,7 @@ class FunctionScope < EvaluationContext
     if !@constants[ref.name]?.nil?
       val = @constants[ref.name]?
       if val.nil?
-        raise "#{ref.name} not in scope"
+        raise Err.msgAt(ref.position, "#{ref.name} not in scope")
       end
       return val
     elsif hasArgument(ref)
@@ -201,7 +202,7 @@ class FunctionScope < EvaluationContext
       puts "function parent used (get const)"
       return @parent.getConstantValue(ref)
     else
-      raise "#{ref.name} not in scope"
+      raise Err.msgAt(ref.position, "#{ref.name} not in scope")
     end
   end
 

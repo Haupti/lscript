@@ -151,7 +151,6 @@ if you give a table two values, this will be interpreted as a set operation at t
 
 ### features
 * modules
-* parser remembers row and column of stuff so panics are more helpful
 * type verification
 * macros (either the c-like ones or better, but this is really for the future)
 

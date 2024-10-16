@@ -1,3 +1,5 @@
+require "../error_utils.cr"
+
 TRUE = "'#t"
 FALSE = "'#f"
 
@@ -80,7 +82,7 @@ def typeName(rtv : RuntimeValue) : String
   when NilValue
     return "nil"
   else
-    raise "unexpected no case matched while evaluating type"
+    raise Err.bug("unexpected no case matched while evaluating type")
   end
 end
 
@@ -125,6 +127,6 @@ def rtvToStr(rtv : RuntimeValue) : String
   when ErrorValue
     return "(error \"#{rtv.reason}\")"
   else
-    raise "unexpected no case matched while converting to string"
+    raise Err.bug("unexpected no case matched while converting to string")
   end
 end

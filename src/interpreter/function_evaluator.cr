@@ -1,4 +1,5 @@
 require "./interpreter.cr"
+require "../error_utils.cr"
 
 module FunctionEvaluator
   extend self
@@ -49,9 +50,9 @@ module FunctionEvaluator
     end
   end
 
-  def evaluateReferencedFunction(fn : LRef | BuildinFunctionRef, args : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
+  def evaluateReferencedFunction(callPosition : Position, fn : LRef | BuildinFunctionRef, args : Array(RuntimeValue), context : EvaluationContext) : RuntimeValue
     if BuildIn::INSTANCE.hasFunction(fn)
-      return BuildIn::INSTANCE.evaluateFunction(fn, args, context)
+      return BuildIn::INSTANCE.evaluateFunction(callPosition, fn, args, context)
     else
       raise "'#{fn.name}' not in scope"
     end

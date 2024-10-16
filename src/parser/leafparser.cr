@@ -1,3 +1,4 @@
+require "../error_utils.cr"
 
 module LeafParser
   extend self
@@ -6,27 +7,27 @@ module LeafParser
         if leaf.leaf.includes? '.'
           floatparsed = leaf.leaf.to_f?
           if floatparsed.nil?
-            raise "not a valid float number"
+            raise Err.msgAt(leaf.position, "not a valid float number")
           else
-            return LNumber.new floatparsed
+            return LNumber.new(floatparsed, leaf.position)
           end
         else
           intparsed = leaf.leaf.to_i?
           if intparsed.nil?
-            raise "not a valid number"
+            raise Err.msgAt(leaf.position, "not a valid number")
           else
-            return LNumber.new intparsed
+            return LNumber.new(intparsed, leaf.position)
           end
         end
     elsif leaf.leaf.starts_with?('"') && leaf.leaf.ends_with?('"')
-      return LString.new leaf.leaf[1..-2]
+      return LString.new(leaf.leaf[1..-2], leaf.position)
     elsif leaf.leaf.includes? '"'
-      raise "'\"' is not allowed in symbols"
+      raise Err.msgAt(leaf.position, "'\"' is not allowed in symbols")
     elsif leaf.leaf.starts_with? "'"
-      return LSymbol.new leaf.leaf
+      return LSymbol.new(leaf.leaf, leaf.position)
     else
-      return LRef.new leaf.leaf
+      return LRef.new(leaf.leaf, leaf.position)
     end
-    raise "BUG: how did i even get here?"
+    raise Err.bug("how did i even get here?")
   end
 end

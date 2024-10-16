@@ -1,4 +1,5 @@
 require "../parser/expression.cr"
+require "../error_utils.cr"
 require "./buildin/buildin.cr"
 require "./evaluation_context.cr"
 require "./runtime_object_types.cr"
@@ -20,7 +21,7 @@ module Interpreter
       when LList
         result = evaluate(datum, context)
       else
-        raise "unexpected no case matched while top level evaluation #{datum}"
+        raise Err.msgAt(datum.position, "unexpected no case matched while top level evaluation #{datum}")
       end
     end
     return result
@@ -41,7 +42,7 @@ module Interpreter
       elsif BuildIn::INSTANCE.hasFunction datum
         return BuildinFunctionRef.new datum.name
       else
-        raise "#{datum.name} not in scope"
+        raise Err.msgAt(datum.position, "#{datum.name} not in scope")
       end
     when LSymbol
       return SymbolValue.new datum.name
@@ -50,7 +51,7 @@ module Interpreter
     when LExpression
       return evaluateExpression(datum, context)
     else
-      raise "unexpected data, cannot evaluate: #{datum}"
+      raise Err.msgAt(datum.position, "unexpected data, cannot evaluate: #{datum}")
     end
   end
 
@@ -63,7 +64,7 @@ module Interpreter
         elsif context.hasConstant datum
           context.getConstantValue(datum)
         else
-          raise "unexpected no case matched while evaluating list (#{datum})"
+          raise Err.msgAt(datum.position, "unexpected no case matched while evaluating list (#{datum})")
         end
       when LNumber
         NumberValue.new datum.value
@@ -76,7 +77,7 @@ module Interpreter
       when LExpression
         evaluateExpression(datum, context)
       else
-        raise "unexpected no case matched while evaluating a list (#{datum})"
+        raise Err.msgAt(datum.position, "unexpected no case matched while evaluating a list (#{datum})")
       end
     end
   return evaluatedListElements
@@ -94,12 +95,12 @@ module Interpreter
       elsif firstResult.is_a? TableObject
         return FunctionEvaluator.evaluateTableFunction(firstResult, evaluateList(expr.arguments, context))
       elsif firstResult.is_a? BuildinFunctionRef
-        return FunctionEvaluator.evaluateReferencedFunction(firstResult, evaluateList(expr.arguments, context), context)
+        return FunctionEvaluator.evaluateReferencedFunction(expr.position, firstResult, evaluateList(expr.arguments, context), context)
       else
-        raise "expected a function name but got '#{rtvToStr(firstResult)}'"
+        raise Err.msgAt(first.position, "expected a function name but got '#{rtvToStr(firstResult)}'")
       end
     else
-      raise "BUG: should not happen"
+      raise Err.bug("should not happen")
     end
   end
 
@@ -108,21 +109,21 @@ module Interpreter
     case refName
     when "defun"
       if arguments.size < 2
-        raise "defun expects at least two arguments"
+        raise Err.msgAt(first.position, "defun expects at least two arguments")
       elsif !arguments[0].is_a? LExpression
-        raise "defun expects an expression as first argument"
+        raise Err.msgAt(first.position,"defun expects an expression as first argument")
       end
       callTemplate = arguments[0].as LExpression
       body = arguments[1..]
       callTemplateFirst = callTemplate.first
       if !callTemplateFirst.is_a? LRef
-        raise "expected a valid identifier"
+        raise Err.msgAt(callTemplateFirst.position, "expected a valid identifier")
       elsif !context.nameFree? callTemplateFirst
-        raise "#{callTemplateFirst.name} already in scope"
+        raise Err.msgAt(callTemplateFirst.position, "#{callTemplateFirst.name} already in scope")
       else
         callarguments : Array(LRef) = callTemplate.arguments.map do |arg|
           if !(arg.is_a? LRef)
-            raise "defun function call template expects only valid argument names"
+            raise Err.msgAt(arg.position, "defun function call template expects only valid argument names")
           end
           arg
         end
@@ -131,59 +132,59 @@ module Interpreter
       return NilValue.new
     when "lambda"
       if arguments.size < 2
-        raise "'lambda' expects at least two arguments"
+        raise Err.msgAt(first.position, "'lambda' expects at least two arguments")
       elsif arguments[0].is_a? LNil
         lambdaCallTemplateArguments  = [] of LData
       elsif arguments[0].is_a? LExpression
         lambdaCallTemplate = arguments[0].as LExpression
         lambdaCallTemplateArguments  = [lambdaCallTemplate.first] + lambdaCallTemplate.arguments
       else
-        raise "'lambda' expects an expression as first argument"
+        raise Err.msgAt(first.position, "'lambda' expects an expression as first argument")
       end
       body = arguments[1..]
 
       lambdaCallArguments : Array(LRef) = lambdaCallTemplateArguments.map do |arg|
         if !(arg.is_a? LRef)
-          raise "'lambda' function call template expects only valid argument names"
+          raise Err.msgAt(arg.position, "'lambda' function call template expects only valid argument names")
         end
         arg
       end
-      return FunctionObject.new(LRef.new("lambda"), lambdaCallArguments, body, context)
+      return FunctionObject.new(LRef.new("lambda", first.position), lambdaCallArguments, body, context)
     when "def"
       if arguments.size < 2 || arguments.size > 2
-        raise "def expects exactly two arguments"
+        raise Err.msgAt(first.position, "def expects exactly two arguments")
       elsif !arguments[0].is_a? LRef
-        raise "def expects a identifier as first argument"
+        raise Err.msgAt(first.position, "def expects a identifier as first argument")
       else
         ref = arguments[0].as(LRef)
         if !context.nameFree? ref
-          raise "'#{ref.name}' already defined"
+          raise Err.msgAt(ref.position, "'#{ref.name}' already defined")
         end
         context.setConstant(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
     when "set"
       if arguments.size < 2 || arguments.size > 2
-        raise "set expects exactly two arguments"
+        raise Err.msgAt(first.position, "set expects exactly two arguments")
       elsif !arguments[0].is_a? LRef
-        raise "set expects a identifier as first argument"
+        raise Err.msgAt(first.position, "set expects a identifier as first argument")
       else
         ref = arguments[0].as(LRef)
         if !context.hasVariable ref
-          raise "variable #{ref.name} not defined"
+          raise Err.msgAt(ref.position, "variable #{ref.name} not defined")
         end
         context.setVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
       end
     when "let"
       if arguments.size != 2
-        raise "'let' expects exactly two arguments"
+        raise Err.msgAt(first.position, "'let' expects exactly two arguments")
       elsif !arguments[0].is_a? LRef
-        raise "'let' expects a identifier as first argument"
+        raise Err.msgAt(first.position, "'let' expects a identifier as first argument")
       else
         ref = arguments[0].as(LRef)
         if !context.nameFree? ref
-          raise "'#{ref.name}' already defined"
+          raise Err.msgAt(ref.position, "'#{ref.name}' already defined")
         end
         context.setNewVariable(ref, evaluate(arguments[1], context))
         return NilValue.new
@@ -192,20 +193,20 @@ module Interpreter
       data = Hash(StringValue | NumberValue | SymbolValue, RuntimeValue).new
       arguments.each do |arg|
         if !arg.is_a? LExpression
-          raise "'table' expects key-value pairs as arguments"
+          raise Err.msgAt(arg.position, "'table' expects key-value pairs as arguments")
         end
         fst = arg.first
         if !fst.is_a? NumberValue && !fst.is_a? StringValue && !fst.is_a? SymbolValue
-          raise "'table' keys can only be number, string and symbol"
+          raise Err.msgAt(fst.position, "'table' keys can only be number, string and symbol")
         elsif fst.arguments.size != 1
-          raise "'table' expects key-value pairs as arguments"
+          raise Err.msgAt(fst.position, "'table' expects key-value pairs as arguments")
         end
         data[fst] = arg.arguments[0]
       end
       return TableObject.new data
     when "if"
       if arguments.size != 3
-        raise "'if' expects exactly three arguments"
+        raise Err.msgAt(first.position, "'if' expects exactly three arguments")
       end
       cond = evaluate(arguments[0], context)
       trueVal = arguments[1]
@@ -216,10 +217,10 @@ module Interpreter
         elsif cond.name == FALSE
           return evaluate(falseVal, context)
         else
-          raise "'if' expects '#t or '#f as first argument value"
+          raise Err.msgAt(arguments[0].position, "'if' expects '#t or '#f as first argument value")
         end
       else
-          raise "'if' expects '#t or '#f as first argument value"
+        raise Err.msgAt(arguments[0].position, "'if' expects '#t or '#f as first argument value")
       end
 
     else
@@ -229,7 +230,7 @@ module Interpreter
 
   def evaluateNonKeywordExpression(first : LRef, arguments : Array(LData), context : EvaluationContext) : RuntimeValue
     if BuildIn::INSTANCE.hasFunction first
-      return FunctionEvaluator.evaluateReferencedFunction(first, evaluateList(arguments, context), context)
+      return FunctionEvaluator.evaluateReferencedFunction(first.position, first, evaluateList(arguments, context), context)
     else
       return context.evaluateFunction(first, evaluateList(arguments, context))
     end
