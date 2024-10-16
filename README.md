@@ -31,6 +31,17 @@ these are:
 * `(if condition-expession then-expression else-expression)` - dont have to explain this
 * ; - comment
 
+## comments
+comments start at a ';' character but also *end* at a ';' character.
+comments also end at '\n' newline characters.
+here is an example:
+```
+; comment
+(defun ;this is my cool funciton; (funcy (bla) (body bla)))
+(funcy "123" ;whoop;) ; also a comment
+
+```
+
 ### defining stuff
 examples speak more that lots of text:
 ```
