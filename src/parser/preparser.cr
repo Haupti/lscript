@@ -1,19 +1,24 @@
 require "./tree.cr"
-
+require "./token.cr"
+require "./position.cr"
 
 module PreParser
   extend self
 
   QUOTE_MARK = "quote"
 
-  def parseWords(str : String) : Array(String)
+  def parseWords(str : String) : Array(Token)
 
-    words = [] of String
+    words = [] of Token
     word = ""
 
     inString = false
     inComment = false
+    row = 1
+    col = 0
     str.chars.each do |c|
+      col += 1
+
       if inComment && inString
         raise "BUG: cannot be in comment and in string at the same time"
       end
@@ -39,6 +44,8 @@ module PreParser
         end
 
         if inComment && c == '\n'
+          row += 1
+          col = 0
           inComment = false
           next
         elsif inComment
@@ -47,7 +54,7 @@ module PreParser
 
         # I
         if c == '\'' && word.strip != ""
-          words << word
+          words << Token.new(word, Position.new(row, col - 1))
           word = "'"
           next
         elsif c == '\''
@@ -60,8 +67,12 @@ module PreParser
           if word == "'"
             raise "standalone quotes are not allowed"
           end
-          words << word
+          words << Token.new(word, Position.new(row, col - 1))
           word = ""
+          if c == '\n'
+            row += 1
+            col = 0
+          end
           next
         end
 
@@ -69,16 +80,16 @@ module PreParser
         if c == '(' || c == ')'
           # IV
           if c == '(' && word == "'"
-            words << "'("
+            words << Token.new("'(", Position.new(row, col))
             word = ""
             next
           elsif word.strip != ""
-            words << word
-            words << ("" + c)
+            words << Token.new(word, Position.new(row, col - 1))
+            words << Token.new(("" + c), Position.new(row,col))
             word = ""
             next
           else
-            words << ("" + c)
+            words << Token.new(("" + c), Position.new(row, col))
             word = ""
             next
           end
@@ -87,24 +98,28 @@ module PreParser
         unless c == ' ' || c == '\n'
           word += c
         end
+      end
 
+      if c == '\n'
+        row += 1
+        col = 0
       end
     end
     return words
   end
 
-  def parse(words : Array(String)) : Array(Node | Leaf)
+  def parse(words : Array(Token)) : Array(Node | Leaf)
     nodes = [] of Node | Leaf
 
     hasQuote = false
     inBrackets = false
     brCounter = 0
-    sectionWords = [] of String
+    sectionWords = [] of Token
     words.each do |word|
-      if word == "("
+      if word.value == "("
         inBrackets = true
         brCounter += 1
-      elsif word == "'("
+      elsif word.value == "'("
         if brCounter > 0
           inBrackets= true
           brCounter += 1
@@ -113,22 +128,22 @@ module PreParser
           brCounter += 1
           hasQuote = true
         end
-      elsif word == ")"
+      elsif word.value == ")"
         brCounter -= 1
       end
 
       if inBrackets && brCounter == 0
         if hasQuote
-          sectionWords[1...1] = QUOTE_MARK
+          sectionWords[1...1] = Token.new(QUOTE_MARK, word.position)
           hasQuote = false
         end
         inBrackets = false
-        nodes.push (Node.new (parse sectionWords[1..-1]))
-        sectionWords = [] of String
+        nodes.push Node.new(parse(sectionWords[1..-1]), word.position)
+        sectionWords = [] of Token
       elsif inBrackets
         sectionWords.push word
       elsif !inBrackets
-        nodes.push (Leaf.new word)
+        nodes.push Leaf.new(word.value, word.position)
       end
     end
     unless brCounter == 0
@@ -139,6 +154,6 @@ module PreParser
   end
 
   def doParse(str : String) : Array(Node | Leaf)
-    return parse (parseWords str)
+    return parse(parseWords str)
   end
 end

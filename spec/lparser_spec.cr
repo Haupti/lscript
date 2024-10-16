@@ -24,24 +24,5 @@ describe LParser do
     ((result.arguments[1].as LExpression).arguments[1].as LExpression).first.should eq LRef.new("+")
     ((result.arguments[1].as LExpression).arguments[1].as LExpression).arguments.should eq ([LRef.new("a"), LRef.new("b"), LRef.new("c"), LRef.new("x"), LRef.new("z"), LRef.new("y")] of LData)
 
-
-    #result.should eq LExpression.new(LRef.new("defun"), [
-    #    LExpression.new(LRef.new("fnname"), [LRef.new("x"), LRef.new("z"), LRef.new("y")] of LData),
-    #    LExpression.new(LRef.new("lambda"), [
-    #      LExpression.new(LRef.new("a"), [
-    #        LRef.new("b"),
-    #        LRef.new("c")
-    #      ] of LData),
-    #      LExpression.new(LRef.new("+"), [
-    #        LRef.new("a"),
-    #        LRef.new("b"),
-    #        LRef.new("c"),
-    #        LRef.new("x"),
-    #        LRef.new("z"),
-    #        LRef.new("y")
-    #      ] of LData)
-    #  ] of LData),
-    #  ] of LData)
-
   end
 end
