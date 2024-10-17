@@ -149,6 +149,27 @@ i'll just give you an example how to use them:
 if you give a table one value, it will be interpreted as a access to the data stored at this key.\
 if you give a table two values, this will be interpreted as a set operation at this given key with given data at the second argument.
 
+## modules
+
+you can import functions and constants from other files, you cannot import variables from other files.\
+to do that, you can use the `load-module` keyword. here is a example:
+```
+; code/files/fileA.l
+(defun (hello name)
+    (out (str-concat "hello " name "!"))
+    )
+
+; code/fileB.l
+(def mymodule (load-module "files/fileA.l"))
+((mymodule 'hello) "steve")
+```
+the path given must be a relative path from the directory of the main file as shown in the example.\
+the `load-module` function will read the files code, interpret it and then build a table object out of its 
+**constant** values. this includes everything that is defined via the `def` and `defun` keywords.\
+this does **not** include variables. however, variables can be modified and read. you have to use getters and setters for them though.\
+the table contains all constants and functions as keys. to access them, you just have to call the table (as with regular tables) with a symbol with the same name as the function or constant. this returns a value or function to use or evaluate.
+
+
 ## Planned
 
 ### buildin
@@ -161,47 +182,8 @@ if you give a table two values, this will be interpreted as a set operation at t
 * 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
 
 ### features
-* modules
 * type verification
 * macros (either the c-like ones or better, but this is really for the future)
-
-### about the planned features: modules
-the idea here is, that modules are imported into a variable.\
-two ideas on how to use it:
-#### I: new syntax
-something like this:
-```
-(def mymodule (import "path")) 
-(mymodule::function_in_my_module ...)
-```
-pros:
-* easy to read and understand
-
-cons:
-* looks not lispy
-* cant do funny shit like in the other idea
-
-#### II: modules generate a map-like structure
-something like this:
-```
-(def mymodule (import "path"))
-((mymodule 'function_in_my_module) ...)
-```
-in this case, as it may not be obvious, the module is a map-like structure that contains\
-the functions mapped to a symbol with the same name except, of course, with quoate - i.e. as symbol.
-this would enable funny stuff like this:
-```
-(def mymodule (import "path"))
-(let syms '('function_in_my_module 'other_function))
-(map (mymodule (get syms 0)) '(1 2 3 4 5))
-```
-
-pros:
-* funny shit like above
-* looks more lispy
-
-cons:
-* might be hella confusing / weird
 
 ### about the planned features: type verification
 id really like to have typing (somehow).\

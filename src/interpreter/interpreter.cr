@@ -7,8 +7,21 @@ require "./runtime_object_types.cr"
 module Interpreter
   extend self
 
-  def run(code : Array(LData)) : RuntimeValue
+  def loadModule(code : Array(LData)) : TableObject
+    result, context = runAndYieldContext(code)
+    tableData = Hash(TableKeyType, RuntimeValue).new
+    context.@constants.keys.each do |key|
+      puts key
+      tableData[SymbolValue.new ("'" + key)] = context.@constants[key]
+    end
+    return TableObject.new tableData
+  end
 
+  def run(code : Array(LData)) : RuntimeValue
+    return runAndYieldContext(code)[0]
+  end
+
+  def runAndYieldContext(code : Array(LData)) : {RuntimeValue, EvaluationContext}
     context = EvaluationContext.new
 
     result : RuntimeValue = NilValue.new
@@ -24,8 +37,7 @@ module Interpreter
         raise Err.msgAt(datum.position, "unexpected no case matched while top level evaluation #{datum}")
       end
     end
-    return result
-
+    return result, context
   end
 
   def evaluate(datum : LData, context : EvaluationContext) : RuntimeValue
@@ -91,9 +103,9 @@ module Interpreter
     when LExpression
       firstResult = evaluateExpression(first, context)
       if firstResult.is_a? FunctionObject
-        return FunctionEvaluator.evaluateFunction(firstResult, evaluateList(expr.arguments, context))
+        return FunctionEvaluator.evaluateFunction(expr.position, firstResult, evaluateList(expr.arguments, context))
       elsif firstResult.is_a? TableObject
-        return FunctionEvaluator.evaluateTableFunction(firstResult, evaluateList(expr.arguments, context))
+        return FunctionEvaluator.evaluateTableFunction(expr.position, firstResult, evaluateList(expr.arguments, context))
       elsif firstResult.is_a? BuildinFunctionRef
         return FunctionEvaluator.evaluateReferencedFunction(expr.position, firstResult, evaluateList(expr.arguments, context), context)
       else
@@ -190,7 +202,7 @@ module Interpreter
         return NilValue.new
       end
     when "table"
-      data = Hash(StringValue | NumberValue | SymbolValue, RuntimeValue).new
+      data = Hash(TableKeyType, RuntimeValue).new
       arguments.each do |arg|
         if !arg.is_a? LExpression
           raise Err.msgAt(arg.position, "'table' expects key-value pairs as arguments")

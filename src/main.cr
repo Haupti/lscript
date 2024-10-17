@@ -1,11 +1,10 @@
 require "./parser/lparser.cr"
+require "./interpreter/module_loader.cr"
 require "./interpreter/interpreter.cr"
 
 def main
-  str = File.read(ARGV[0])
   before = Time.utc
-  parsed = LParser.parse(str)
-  Interpreter.run parsed
+  ModuleLoader::INSTANCE.runMain(ARGV[0])
   after =  Time.utc
 
   puts "#{before.millisecond}:#{before.nanosecond}"

@@ -6,7 +6,6 @@ class EvaluationContext
   @constants : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
   @variables : Hash(String, RuntimeValue) = Hash(String, RuntimeValue).new
 
-
   def nameFree?(ref : LRef) : Bool
     fn = @constants[ref.name]?
     if fn.nil?
@@ -33,9 +32,9 @@ class EvaluationContext
     end
 
     if !fn.nil? && fn.is_a? FunctionObject
-      return FunctionEvaluator.evaluateFunction(fn, arguments)
+      return FunctionEvaluator.evaluateFunction(ref.position, fn, arguments)
     elsif !fn.nil? && fn.is_a? TableObject
-      return FunctionEvaluator.evaluateTableFunction(fn, arguments)
+      return FunctionEvaluator.evaluateTableFunction(ref.position, fn, arguments)
     else
       return FunctionEvaluator.evaluateReferencedFunction(ref.position, ref, arguments, self)
     end
@@ -135,9 +134,9 @@ class FunctionScope < EvaluationContext
     end
 
     if !fn.nil? && fn.is_a? FunctionObject
-      return FunctionEvaluator.evaluateFunction(fn, arguments)
+      return FunctionEvaluator.evaluateFunction(ref.position, fn, arguments)
     elsif !fn.nil? && fn.is_a? TableObject
-      return FunctionEvaluator.evaluateTableFunction(fn, arguments)
+      return FunctionEvaluator.evaluateTableFunction(ref.position, fn, arguments)
     else
       return @parent.evaluateFunction(ref, arguments)
     end

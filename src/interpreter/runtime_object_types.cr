@@ -33,8 +33,10 @@ class FunctionObject
   end
 end
 
+alias TableKeyType = StringValue | NumberValue | SymbolValue
+
 record TableObject,
-  data : Hash(StringValue | NumberValue | SymbolValue, RuntimeValue)
+  data : Hash(TableKeyType, RuntimeValue)
 
 record NumberValue,
   value : Int64 | Int32 | Float64 | Float32

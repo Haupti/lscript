@@ -86,7 +86,7 @@ module ListBuildin
 
     results = [] of RuntimeValue
     snd.elems.each do |elem|
-      results << FunctionEvaluator.evaluateFunction(fst, [elem])
+      results << FunctionEvaluator.evaluateFunction(position, fst, [elem])
     end
     return ListObject.new results
   end
@@ -106,7 +106,7 @@ module ListBuildin
 
     results = [] of RuntimeValue
     snd.elems.each do |elem|
-      predicateResult = FunctionEvaluator.evaluateFunction(fst, [elem])
+      predicateResult = FunctionEvaluator.evaluateFunction(position, fst, [elem])
       if !predicateResult.is_a? SymbolValue
         raise Err.msgAt(position, "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol")
       elsif predicateResult.name == TRUE
