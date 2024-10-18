@@ -181,10 +181,10 @@ the table contains all constants and functions as keys. to access them, you just
 ## Planned
 
 ### buildin
-* network: tcp / http / socket ?
-* 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
+* high-level basic http functions (server & client)
 * eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
-* more file functions other than the basic read and write
+* low-level file stuff
+* low-level network stuff
 
 ### features
 * escape sequences in strings (\" is a " in the string, etc)
@@ -198,6 +198,10 @@ the table contains all constants and functions as keys. to access them, you just
 ### other
 * a standart library
     * json
+    * low and high-level file stuff
+    * low and high-level network stuff (tcp/http both client and server)
+    * utilities including:
+        * 'block' an expression that does nothing except evalute a list of expression in the body with its own scope
 * language server for editors
 
 ### about the planned features: type verification
