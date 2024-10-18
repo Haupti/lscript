@@ -131,6 +131,10 @@ these functions expect the true or false symbols
 * `(str-length string) -> number`
 * `(char-at string integer) -> string`
 
+### file
+* `(file-read string) -> string | error`
+* `(file-write string string) -> nil | error` first argument is the path, second is the content written to the file
+
 ## tables
 tables are a versatile data type. they kind of act like maps, structures or dictionaries (depending on which language you know).\
 i'll just give you an example how to use them:
@@ -174,16 +178,17 @@ the table contains all constants and functions as keys. to access them, you just
 ## Planned
 
 ### buildin
-* read file & write file
 * json decoding and encoding of tables
 * program arguments
 * env vars
-* eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
 * network: tcp / http / socket ?
+* eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
 * parse number
+* more file functions other than the basic read and write
 * 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
 
 ### features
+* escape sequences in strings (\" is a " in the string, etc)
 * type verification
 * macros (either the c-like ones or better, but this is really for the future)
 
@@ -193,6 +198,7 @@ the table contains all constants and functions as keys. to access them, you just
 
 ### other
 * language server for editors
+* a standart library
 
 ### about the planned features: type verification
 id really like to have typing (somehow).\

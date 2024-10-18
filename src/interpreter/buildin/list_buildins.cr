@@ -10,7 +10,7 @@ module ListBuildin
     end
     fst = arguments[0]
     if !fst.is_a? ListObject
-      raise Err.msgAt(position, "'tail' expects a list as first argument")
+      raise Err.unexpectedValue(position, "'tail' expects a list as first argument", fst)
     elsif fst.elems.size <= 1
       return ListObject.new ([] of RuntimeValue)
     else
@@ -24,7 +24,7 @@ module ListBuildin
     end
     fst = arguments[0]
     if !fst.is_a? ListObject
-      raise Err.msgAt(position, "'head' expects a list as first argument")
+      raise Err.unexpectedValue(position, "'head' expects a list as first argument", fst)
     elsif fst.elems.size == 0
       raise Err.msgAt(position, "'head' expects a non-empty list as first argument")
     else
@@ -39,7 +39,7 @@ module ListBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? ListObject
-      raise Err.msgAt(position, "'get' expects a list as first argument")
+      raise Err.unexpectedValue(position, "'get' expects a list as first argument", fst)
     elsif snd.is_a? NumberValue
       sndVal : Int64 | Int32 | Float64 | Float32 = snd.value
       if sndVal.integer?
@@ -48,10 +48,10 @@ module ListBuildin
         end
         return fst.elems[sndVal.as Int]
       else
-        raise Err.msgAt(position, "'get' expects an integer as second argument")
+        raise Err.unexpectedValue(position, "'get' expects an integer as second argument", snd)
       end
     else
-      raise Err.msgAt(position, "'get' expects integer as second argument")
+      raise Err.unexpectedValue(position, "'get' expects integer as second argument", snd)
     end
   end
 
@@ -62,10 +62,10 @@ module ListBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? ListObject
-      raise Err.msgAt(position, "'concat' expects a list as first argument")
+      raise Err.unexpectedValue(position, "'concat' expects a list as first argument", fst)
     end
     if !snd.is_a? ListObject
-      raise Err.msgAt(position, "'concat' expects a list as second argument")
+      raise Err.unexpectedValue(position, "'concat' expects a list as second argument", snd)
     end
 
     return ListObject.new (fst.elems + snd.elems)
@@ -78,10 +78,10 @@ module ListBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? FunctionObject
-      raise Err.msgAt(position, "'map' expects a function as first argument")
+      raise Err.unexpectedValue(position, "'map' expects a function as first argument", fst)
     end
     if !snd.is_a? ListObject
-      raise Err.msgAt(position, "'map' expects a list as second argument")
+      raise Err.unexpectedValue(position, "'map' expects a list as second argument", snd)
     end
 
     results = [] of RuntimeValue
@@ -98,23 +98,31 @@ module ListBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? FunctionObject
-      raise Err.msgAt(position, "'filter' expects a function as first argument")
+      raise Err.unexpectedValue(position, "'filter' expects a function as first argument", fst)
     end
     if !snd.is_a? ListObject
-      raise Err.msgAt(position, "'filter' expects a list as second argument")
+      raise Err.unexpectedValue(position, "'filter' expects a list as second argument", snd)
     end
 
     results = [] of RuntimeValue
     snd.elems.each do |elem|
       predicateResult = FunctionEvaluator.evaluateFunction(position, fst, [elem])
       if !predicateResult.is_a? SymbolValue
-        raise Err.msgAt(position, "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol")
+        raise Err.unexpectedValue(
+          position,
+          "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol",
+          predicateResult
+        )
       elsif predicateResult.name == TRUE
         results << elem
       elsif predicateResult.name == FALSE
         next
       else
-        raise Err.msgAt(position, "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol")
+        raise Err.unexpectedValue(
+          position,
+          "'filter' expects a predicate function. '#{fst.name}' didn't return a booleanish symbol",
+          predicateResult
+        )
       end
     end
     return ListObject.new results
@@ -126,7 +134,7 @@ module ListBuildin
     end
     fst = arguments[0]
     if !fst.is_a? ListObject
-      raise Err.msgAt(position, "'length' expects a list argument")
+      raise Err.unexpectedValue(position, "'length' expects a list argument", fst)
     end
     return NumberValue.new fst.elems.size
   end
@@ -138,7 +146,7 @@ module ListBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? ListObject
-      raise Err.msgAt(position, "'contains?' expects a list as fist argument")
+      raise Err.unexpectedValue(position, "'contains?' expects a list as fist argument", fst)
     end
     fst.elems.each do |elem|
       if elem == snd
@@ -156,13 +164,13 @@ module ListBuildin
     snd = arguments[1]
     trd = arguments[2]?
     unless fst.is_a? ListObject
-      raise Err.msgAt(position, "'sublist' expects a list as first argument")
+      raise Err.unexpectedValue(position, "'sublist' expects a list as first argument", fst)
     end
     unless snd.is_a? NumberValue
-      raise Err.msgAt(position, "'sublist' expects a integer as second argument")
+      raise Err.unexpectedValue(position, "'sublist' expects a integer as second argument", snd)
     end
     unless (trd == nil || trd.is_a? NumberValue)
-      raise Err.msgAt(position, "'sublist' expects nil or an integer as third argument")
+      raise Err.unexpectedValue(position, "'sublist' expects nil or an integer as third argument", trd)
     end
 
     sndValPre = snd.value
@@ -177,13 +185,13 @@ module ListBuildin
           trdVal = trdValPre.as Int64
           return ListObject.new fst.elems[sndVal..trdVal]
         else
-          raise Err.msgAt(position, "'sublist' expects an integer or nil as third argument")
+          raise Err.unexpectedValue(position, "'sublist' expects an integer or nil as third argument", trd)
         end
       else
-        raise Err.msgAt(position, "'sublist' expects an integer or nil as third argument")
+        raise Err.unexpectedValue(position, "'sublist' expects an integer or nil as third argument", trd)
       end
     else
-      raise Err.msgAt(position, "'sublist' expects an integer as second argument")
+      raise Err.unexpectedValue(position, "'sublist' expects an integer as second argument", snd)
     end
   end
 end

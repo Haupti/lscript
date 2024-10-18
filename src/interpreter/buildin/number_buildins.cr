@@ -9,14 +9,16 @@ module NumberBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if fst.is_a? NumberValue && snd.is_a? NumberValue
-      if fst.value < snd.value
-        return SymbolValue.trueValue
-      else
-        return SymbolValue.falseValue
-      end
+    unless fst.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'lt?' expects a number as first argument", fst)
+    end
+    unless snd.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'lt?' expects a number as second argument", snd)
+    end
+    if fst.value < snd.value
+      return SymbolValue.trueValue
     else
-      raise Err.msgAt(position, "'lt?' expects two number arguments")
+      return SymbolValue.falseValue
     end
   end
 
@@ -26,14 +28,16 @@ module NumberBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if fst.is_a? NumberValue && snd.is_a? NumberValue
-      if fst.value <= snd.value
-        return SymbolValue.trueValue
-      else
-        return SymbolValue.falseValue
-      end
+    unless fst.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'lte?' expects a number as first argument", fst)
+    end
+    unless snd.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'lte?' expects a number as second argument", snd)
+    end
+    if fst.value <= snd.value
+      return SymbolValue.trueValue
     else
-      raise Err.msgAt(position, "'lte?' expects two number arguments")
+      return SymbolValue.falseValue
     end
   end
 
@@ -43,14 +47,16 @@ module NumberBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if fst.is_a? NumberValue && snd.is_a? NumberValue
-      if fst.value >= snd.value
-        return SymbolValue.trueValue
-      else
-        return SymbolValue.falseValue
-      end
+    unless fst.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'gte?' expects a number as first argument", fst)
+    end
+    unless snd.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'gte?' expects a number as second argument", snd)
+    end
+    if fst.value >= snd.value
+      return SymbolValue.trueValue
     else
-      raise Err.msgAt(position, "'gte?' expects two number arguments")
+      return SymbolValue.falseValue
     end
   end
 
@@ -60,14 +66,16 @@ module NumberBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if fst.is_a? NumberValue && snd.is_a? NumberValue
-      if fst.value > snd.value
-        return SymbolValue.trueValue
-      else
-        return SymbolValue.falseValue
-      end
+    unless fst.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'gt?' expects a number as first argument", fst)
+    end
+    unless snd.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'gt?' expects a number as second argument", snd)
+    end
+    if fst.value > snd.value
+      return SymbolValue.trueValue
     else
-      raise Err.msgAt(position, "'gt?' expects two number arguments")
+      return SymbolValue.falseValue
     end
   end
 
@@ -80,7 +88,7 @@ module NumberBuildin
       if arg.is_a? NumberValue
         result += arg.value
       else
-        raise Err.msgAt(position, "'+' expects number arguments but got #{typeName(arg)}")
+        raise Err.unexpectedValue(position, "'+' expects number arguments", arg)
       end
     end
     return NumberValue.new result
@@ -99,7 +107,7 @@ module NumberBuildin
       if arg.is_a? NumberValue
         result += arg.value
       else
-        raise Err.msgAt(position, "'*' expects number arguments but got #{arg}")
+        raise Err.unexpectedValue(position, "'*' expects number arguments", arg)
       end
     end
     return NumberValue.new result
@@ -111,8 +119,11 @@ module NumberBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if !(fst.is_a? NumberValue && snd.is_a? NumberValue)
-      raise Err.msgAt(position, "'/' expects two integer arguments but got '#{fst}' and '#{snd}'")
+    unless fst.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'/' expects a number as first argument", fst)
+    end
+    unless snd.is_a? NumberValue
+      raise Err.unexpectedValue(position, "'/' expects a number as second argument", snd)
     end
     fstVal = fst.value
     sndVal = snd.value
@@ -125,14 +136,14 @@ module NumberBuildin
     end
     initial = arguments[0]
     if !(initial.is_a? NumberValue)
-      raise Err.msgAt(position, "'-' expects number arguments but got #{typeName(initial)}")
+      raise Err.unexpectedValue(position, "'-' expects number arguments", initial)
     end
     result = initial.value
     arguments[1..].each do |arg|
       if arg.is_a? NumberValue
         result -= arg.value
       else
-        raise Err.msgAt(position, "'-' expects number arguments but got #{typeName(arg)}")
+        raise Err.unexpectedValue(position, "'-' expects number arguments", arg)
       end
     end
     return NumberValue.new result
@@ -144,8 +155,11 @@ module NumberBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    if !(fst.is_a? NumberValue  && snd.is_a? NumberValue && snd.value.integer?)
-      raise Err.msgAt(position, "'mod' expects two integer arguments but got #{typeName(fst)} and #{typeName(snd)}")
+    unless fst.is_a? NumberValue && fst.value.integer?
+      raise Err.unexpectedValue(position, "'mod' expects a integer as first argument", fst)
+    end
+    unless snd.is_a? NumberValue && snd.value.integer?
+      raise Err.unexpectedValue(position, "'mod' expects a integer as second argument", snd)
     end
     fstVal = fst.value
     sndVal = snd.value
@@ -153,10 +167,10 @@ module NumberBuildin
       if sndVal.integer?
         return NumberValue.new (fstVal % sndVal.as Int)
       else
-        raise Err.msgAt(position, "'mod' expects two integer arguments but got '#{fst.value}' and '#{snd.value}'")
+        raise Err.unexpectedValue(position, "'mod' expects a integer as second argument", snd)
       end
     else
-      raise Err.msgAt(position, "'mod' expects two integer arguments but got '#{fst.value}' and '#{snd.value}'")
+      raise Err.unexpectedValue(position, "'mod' expects a integer as first argument", fst)
     end
   end
 end

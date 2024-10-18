@@ -1,5 +1,16 @@
+require "./interpreter/runtime_object_types.cr"
+
 module Err
   extend self
+  def unexpectedValue(at : Position, msg : String, value : RuntimeValue | Nil) : String
+    if value.nil?
+      return "ERROR at (#{at.row},#{at.col}): #{msg} but got nil"
+    end
+    return "ERROR at (#{at.row},#{at.col}): #{msg} but got #{rtvToStr(value)}"
+  end
+  def msgAt(at : Position, msg : String) : String
+    return "ERROR at (#{at.row},#{at.col}): #{msg}"
+  end
   def msgAt(at : Position, msg : String) : String
     return "ERROR at (#{at.row},#{at.col}): #{msg}"
   end

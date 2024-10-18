@@ -10,7 +10,7 @@ module StringBuildin
       if arg.is_a? StringValue
         result += arg.value
       else
-        raise Err.msgAt(position, "'str-concat' expects string arguments but got #{arg}")
+        raise Err.unexpectedValue(position, "'str-concat' expects string arguments", arg)
       end
     end
     return StringValue.new result
@@ -24,13 +24,13 @@ module StringBuildin
     snd = arguments[1]
     trd = arguments[2]?
     unless fst.is_a? StringValue
-      raise Err.msgAt(position, "'substr' expects a string as first argument")
+      raise Err.unexpectedValue(position, "'substr' expects a string as first argument", fst)
     end
     unless snd.is_a? NumberValue
-      raise Err.msgAt(position, "'substr' expects a integer as second argument")
+      raise Err.unexpectedValue(position, "'substr' expects a integer as second argument", snd)
     end
     unless (trd == nil || trd.is_a? NumberValue)
-      raise Err.msgAt(position, "'substr' expects nil or an integer as third argument")
+      raise Err.unexpectedValue(position, "'substr' expects nil or an integer as third argument", trd)
     end
 
     sndValPre = snd.value
@@ -45,13 +45,13 @@ module StringBuildin
           trdVal = trdValPre.as Int64
           return StringValue.new fst.value[sndVal..trdVal]
         else
-          raise Err.msgAt(position, "'substr' expects an integer or nil as third argument")
+          raise Err.unexpectedValue(position, "'substr' expects an integer or nil as third argument", trd)
         end
       else
-        raise Err.msgAt(position, "'substr' expects an integer or nil as third argument")
+        raise Err.unexpectedValue(position, "'substr' expects an integer or nil as third argument", trd)
       end
     else
-      raise Err.msgAt(position, "'substr' expects an integer as second argument")
+      raise Err.unexpectedValue(position, "'substr' expects an integer as second argument", snd)
     end
   end
 
@@ -62,7 +62,7 @@ module StringBuildin
     fst = arguments[0]
     snd = arguments[1]
     if !fst.is_a? StringValue
-      raise Err.msgAt(position, "'char-at' expects a string as first argument")
+      raise Err.unexpectedValue(position, "'char-at' expects a string as first argument", fst)
     elsif snd.is_a? NumberValue
       sndVal : Int64 | Int32 | Float64 | Float32 = snd.value
       if sndVal.integer?
@@ -71,10 +71,10 @@ module StringBuildin
         end
         return StringValue.new "#{fst.value[sndVal.as Int]}"
       else
-        raise Err.msgAt(position, "'chat-at' expects an integer as second argument")
+        raise Err.unexpectedValue(position, "'chat-at' expects an integer as second argument", snd)
       end
     else
-      raise Err.msgAt(position, "'chat-at' expects integer as second argument")
+      raise Err.unexpectedValue(position, "'chat-at' expects integer as second argument", snd)
     end
   end
 
@@ -85,11 +85,16 @@ module StringBuildin
     fst = arguments[0]
     snd = arguments[1]
     trd = arguments[2]
-    unless fst.is_a? StringValue && snd.is_a? StringValue && trd.is_a? StringValue
-      raise Err.msgAt(position, "'str-replace' expects only string argmuments")
-    else
-      return StringValue.new fst.value.sub(snd.value, trd.value)
+    unless fst.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-replace' expects a string as first argmument", fst)
     end
+    unless snd.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-replace' expects a string as second argmument", snd)
+    end
+    unless trd.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-replace' expects a string as third argmument", trd)
+    end
+    return StringValue.new fst.value.sub(snd.value, trd.value)
   end
 
   def evaluateStrReplaceAll(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
@@ -99,11 +104,16 @@ module StringBuildin
     fst = arguments[0]
     snd = arguments[1]
     trd = arguments[2]
-    unless fst.is_a? StringValue && snd.is_a? StringValue && trd.is_a? StringValue
-      raise Err.msgAt(position, "'str-replace-all' expects only string argmuments")
-    else
-      return StringValue.new fst.value.gsub(snd.value, trd.value)
+    unless fst.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-replace-all' expects a string as first argmument", fst)
     end
+    unless snd.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-replace-all' expects a string as second argmument", snd)
+    end
+    unless trd.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-replace-all' expects a string as third argmument", trd)
+    end
+    return StringValue.new fst.value.gsub(snd.value, trd.value)
   end
 
   def evaluateStrContains(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
@@ -112,14 +122,16 @@ module StringBuildin
     end
     fst = arguments[0]
     snd = arguments[1]
-    unless fst.is_a? StringValue && snd.is_a? StringValue
-      raise Err.msgAt(position, "'str-contains?' expects only string argmuments")
+    unless fst.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-contains?' expects a string as first argmument", fst)
+    end
+    unless snd.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-contains?' expects a string as second argmument", snd)
+    end
+    if fst.value.includes? snd.value
+      return SymbolValue.trueValue
     else
-      if fst.value.includes? snd.value
-        return SymbolValue.trueValue
-      else
-        return SymbolValue.falseValue
-      end
+      return SymbolValue.falseValue
     end
   end
 
@@ -129,7 +141,7 @@ module StringBuildin
     end
     fst = arguments[0]
     unless fst.is_a? StringValue
-      raise Err.msgAt(position, "'str-length' expects a string argmument")
+      raise Err.unexpectedValue(position, "'str-length' expects a string argmument", fst)
     else
       return NumberValue.new fst.value.size
     end

@@ -13,7 +13,7 @@ module SymbolBuildin
       elsif arg.is_a? SymbolValue && arg.name == FALSE
         false
       else
-        raise Err.msgAt(position, "'and' expects either the symbol #{TRUE} or #{FALSE}")
+        raise Err.unexpectedValue(position, "'and' expects either the symbol #{TRUE} or #{FALSE}", arg)
       end
     end
     if result
@@ -33,7 +33,7 @@ module SymbolBuildin
       elsif arg.is_a? SymbolValue && arg.name == FALSE
         false
       else
-        raise Err.msgAt(position, "'or' expects either the symbol #{TRUE} or #{FALSE}")
+        raise Err.unexpectedValue(position, "'or' expects either the symbol #{TRUE} or #{FALSE}", arg)
       end
     end
     if result
@@ -53,7 +53,7 @@ module SymbolBuildin
     elsif arg.is_a? SymbolValue && arg.name == FALSE
       return SymbolValue.trueValue
     else
-      raise Err.msgAt(position, "'or' expects either the symbol #{TRUE} or #{FALSE}")
+      raise Err.unexpectedValue(position, "'not' expects either the symbol #{TRUE} or #{FALSE}", arg)
     end
 
   end

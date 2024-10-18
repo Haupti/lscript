@@ -1,5 +1,6 @@
 require "../runtime_object_types.cr"
 require "./list_buildins.cr"
+require "./file_buildins.cr"
 require "./number_buildins.cr"
 require "./string_buildins.cr"
 require "./io_buildin.cr"
@@ -19,6 +20,7 @@ module BuildIn
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
+      "file-read", "file-write", # io / file stuff
     ];
 
     def hasFunction(ref : LRef | BuildinFunctionRef) : Bool
@@ -107,6 +109,10 @@ module BuildIn
           return evaluateErrorReason(callPosition, arguments)
         when "panic"
           return evaluateErrorPanic(callPosition, arguments)
+        when "file-read"
+          return FileBuildin.evaluateFileRead(callPosition, arguments)
+        when "file-write"
+          return FileBuildin.evaluateFileWrite(callPosition, arguments)
         else
           raise Err.msgAt(callPosition, "#{ref.name} not in scope")
         end
@@ -162,7 +168,7 @@ module BuildIn
       end
       fst = arguments[0]
       if !fst.is_a? StringValue
-        raise Err.msgAt(position, "'err' expects a string argument")
+        raise Err.unexpectedValue(position, "'err' expects a string argument", fst)
       end
       return ErrorValue.new fst.value
     end
@@ -184,7 +190,7 @@ module BuildIn
       end
       fst = arguments[0]
       if !fst.is_a? ErrorValue
-        raise Err.msgAt(position, "'err-reason' expects an error value as argument")
+        raise Err.unexpectedValue(position, "'err-reason' expects an error value as argument", fst)
       end
       return StringValue.new fst.reason
     end
@@ -198,7 +204,7 @@ module BuildIn
         puts "panic: #{error.reason}"
         exit 1
       else
-        raise Err.msgAt(position, "'panic' expects an error value")
+        raise Err.unexpectedValue(position, "'panic' expects an error value", error)
       end
 
     end
