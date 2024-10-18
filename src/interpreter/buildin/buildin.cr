@@ -19,7 +19,6 @@ module BuildIn
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
-      "load-module", # module stuff
     ];
 
     def hasFunction(ref : LRef | BuildinFunctionRef) : Bool
@@ -108,23 +107,10 @@ module BuildIn
           return evaluateErrorReason(callPosition, arguments)
         when "panic"
           return evaluateErrorPanic(callPosition, arguments)
-        when "load-module"
-          return evaluateLoadModule(callPosition, arguments)
         else
           raise Err.msgAt(callPosition, "#{ref.name} not in scope")
         end
       end
-    end
-
-    def evaluateLoadModule(position : Position, arguments : Array(RuntimeValue)) : TableObject
-      if arguments.size != 1
-        raise Err.msgAt(position, "'load-module' one argument")
-      end
-      first = arguments[0]
-      if !first.is_a? StringValue
-        raise Err.msgAt(position, "'load-module' expects a string")
-      end
-      return ModuleLoader::INSTANCE.loadModule(first.value)
     end
 
     def evaluateToStr(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue

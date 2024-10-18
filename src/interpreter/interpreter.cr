@@ -216,6 +216,15 @@ module Interpreter
         data[fst] = arg.arguments[0]
       end
       return TableObject.new data
+    when "load-module"
+      if arguments.size != 1
+        raise Err.msgAt(first.position, "'load-module' one argument")
+      end
+      first = arguments[0]
+      if !first.is_a? LString
+        raise Err.msgAt(first.position, "'load-module' expects a string")
+      end
+      return ModuleLoader::INSTANCE.loadModule(first.value)
     when "if"
       if arguments.size != 3
         raise Err.msgAt(first.position, "'if' expects exactly three arguments")

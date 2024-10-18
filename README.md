@@ -29,6 +29,7 @@ these are:
 * `(let name value-expession)` - defines a mutable value in the current scope
 * `(set name value-expession)` - mutates a already defined mutable value
 * `(if condition-expession then-expression else-expression)` - dont have to explain this
+* `(load-module string)` - loads a module from a file as table containing the functions and constants. path must be relative to entrypoint file
 * ; - comment
 
 ## comments
@@ -174,6 +175,7 @@ the table contains all constants and functions as keys. to access them, you just
 
 ### buildin
 * read file & write file
+* json decoding and encoding of tables
 * program arguments
 * env vars
 * eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
@@ -184,6 +186,13 @@ the table contains all constants and functions as keys. to access them, you just
 ### features
 * type verification
 * macros (either the c-like ones or better, but this is really for the future)
+
+### optimizations
+* loading modules and keeping the parsed code in memory so this part does not have to be done again when importing the same module somewhere else.
+* evaluat the code and keep the prebuild module table and copy it when loaded again
+
+### other
+* language server for editors
 
 ### about the planned features: type verification
 id really like to have typing (somehow).\
