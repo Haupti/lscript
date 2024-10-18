@@ -19,7 +19,8 @@ module BuildIn
       "out", "get-input", # io stuff
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
-      "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?", "str-length", "char-at", # string stuff
+      "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?",
+      "str-length", "char-at", "str-to-num", # string stuff
       "file-read", "file-write", # io / file stuff
     ];
 
@@ -93,6 +94,8 @@ module BuildIn
           return StringBuildin.evaluateSubstr(callPosition, arguments)
         when "char-at"
           return StringBuildin.evaluateCharAt(callPosition, arguments)
+        when "str-to-num"
+          return StringBuildin.evaluateStrToNum(callPosition, arguments)
         when "eq?"
           return evaluateEquals(callPosition, arguments)
         when "debug"

@@ -130,6 +130,7 @@ these functions expect the true or false symbols
 * `(str-contains? string string) -> symbol`
 * `(str-length string) -> number`
 * `(char-at string integer) -> string`
+* `(str-to-num string) -> number | error`
 
 ### file
 * `(file-read string) -> string | error`
@@ -182,10 +183,10 @@ the table contains all constants and functions as keys. to access them, you just
 * program arguments
 * env vars
 * network: tcp / http / socket ?
-* eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
 * parse number
-* more file functions other than the basic read and write
 * 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
+* eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
+* more file functions other than the basic read and write
 
 ### features
 * escape sequences in strings (\" is a " in the string, etc)
@@ -197,8 +198,8 @@ the table contains all constants and functions as keys. to access them, you just
 * evaluat the code and keep the prebuild module table and copy it when loaded again
 
 ### other
-* language server for editors
 * a standart library
+* language server for editors
 
 ### about the planned features: type verification
 id really like to have typing (somehow).\

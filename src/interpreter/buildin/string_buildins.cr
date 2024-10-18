@@ -1,9 +1,36 @@
 module StringBuildin
   extend self
 
+  def evaluateStrToNum(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
+    if arguments.size != 1
+      raise Err.msgAt(position, "'str-to-num' expects one argument")
+    end
+
+    fst = arguments[0]
+    unless fst.is_a? StringValue
+      raise Err.unexpectedValue(position, "'str-to-num' expects a string argument", fst)
+    end
+
+    if fst.value.includes? '.'
+      floatparsed = fst.value.to_f?
+      if floatparsed.nil?
+        return ErrorValue.new "parsing number failed on '#{fst.value}'"
+      else
+        return NumberValue.new(floatparsed)
+      end
+    else
+      intparsed = fst.value.to_i?
+      if intparsed.nil?
+        return ErrorValue.new "parsing number failed on '#{fst.value}'"
+      else
+        return NumberValue.new(intparsed)
+      end
+    end
+  end
+
   def evaluateStrConcat(position : Position, arguments : Array(RuntimeValue)) : RuntimeValue
     if arguments.size < 2
-      raise "'str-concat' expects at least two arguments"
+      raise Err.msgAt(position, "'str-concat' expects at least two arguments")
     end
     result = ""
     arguments.each do |arg|

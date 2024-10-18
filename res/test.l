@@ -5,4 +5,4 @@
 ((tm 'hello) "steve")
 ((tm 'hello) "steve")
 
-(out (str-concat "read data: '" (file-read "res/testmodule.l") "'"))
+(out (str-to-num "1.2"))
