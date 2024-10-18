@@ -107,6 +107,8 @@ these functions expect the true or false symbols
 ### io
 * `(out *) -> nil`
 * `(get-input) -> string`
+* `(env-get) -> string | error`
+* `(args-get) -> list of string`
 
 ### list
 * `(contains? list elem) -> symbol`
@@ -179,11 +181,7 @@ the table contains all constants and functions as keys. to access them, you just
 ## Planned
 
 ### buildin
-* json decoding and encoding of tables
-* program arguments
-* env vars
 * network: tcp / http / socket ?
-* parse number
 * 'block' and expression that does nothing except evalute a list of expression in the body with its own scope
 * eval which evaluates symbols and lists (treats them as function name ?, lists are treated as expession ?)
 * more file functions other than the basic read and write
@@ -199,6 +197,7 @@ the table contains all constants and functions as keys. to access them, you just
 
 ### other
 * a standart library
+    * json
 * language server for editors
 
 ### about the planned features: type verification

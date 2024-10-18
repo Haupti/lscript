@@ -16,7 +16,7 @@ module BuildIn
       "+", "-", "*", "/", "mod", "lt?", "lte?", "gt?", "gte?", # number stuff
       "and", "or", "not", # bool stuff
       "debug", "to-str", "typeof", "err", "err?", "err-reason", "panic", # weird stuff
-      "out", "get-input", # io stuff
+      "out", "get-input", "env-get", "args-get", # io stuff
       "contains?", "length", "sublist", "map", "concat", "head", "tail", "filter", "get", # list stuff
       "eq?", # comparison
       "str-concat", "substr", "str-replace" ,"str-replace-all", "str-contains?",
@@ -60,8 +60,12 @@ module BuildIn
           return SymbolBuildin.evaluateNot(callPosition, arguments)
         when "out"
           return IOBuildin.evaluateOut(arguments)
+        when "env-get"
+          return IOBuildin.evaluateEnvGet(callPosition, arguments)
         when "get-input"
-          return IOBuildin.evaluateGetInput(arguments)
+          return IOBuildin.evaluateGetInput(callPosition, arguments)
+        when "args-get"
+          return IOBuildin.evaluateArgsGet(callPosition, arguments)
         when "contains?"
           return ListBuildin.evaluateContains(callPosition, arguments)
         when "sublist"
